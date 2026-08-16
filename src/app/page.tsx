@@ -11,8 +11,6 @@ export default function Home() {
       <Header />
       <main>
         <ImageSection src="/image/paint.png" alt="Nouveautés" title="Nouveautés" />
-        <ImageSection src="/image/2_DESKTOP.webp" alt="Capuchon" title="Capuchon" />
-        <ImageSection src="/image/3_DESKTOP.webp" alt="T-shirts" title="T-shirts" />
         <Newsletter />
       </main>
       <Footer />
