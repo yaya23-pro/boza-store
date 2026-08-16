@@ -14,7 +14,7 @@ export default function ImageSection({ src, alt, title }: ImageSectionProps) {
           className="w-full h-full object-cover"
         />
       </div>
-      <h1 className="w-full text-right pr-4 pt-2.5 pb-6 font-display text-base font-black tracking-wide uppercase text-boza-black max-[640px]:text-sm max-[640px]:pb-8">
+      <h1 className="w-full text-center pt-2.5 pb-6 font-display text-base font-black tracking-wide uppercase text-boza-black max-[640px]:text-sm max-[640px]:pb-8">
         {title}
       </h1>
     </section>
