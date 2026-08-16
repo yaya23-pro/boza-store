@@ -158,17 +158,20 @@ export async function getOrderDetail(orderId: string, clientId: string): Promise
     };
   });
 
-  const adresse = data.adresses
+  const adresseData = data.adresses as any;
+  const paiementData = data.paiements as any;
+
+  const adresse = adresseData
     ? {
-        rue: data.adresses.rue,
-        ville: data.adresses.ville,
-        codePostal: data.adresses.code_postal,
-        pays: data.adresses.pays,
+        rue: adresseData.rue,
+        ville: adresseData.ville,
+        codePostal: adresseData.code_postal,
+        pays: adresseData.pays,
       }
     : null;
 
-  const paiement = data.paiements
-    ? { mode: data.paiements.mode, statut: data.paiements.statut }
+  const paiement = paiementData
+    ? { mode: paiementData.mode, statut: paiementData.statut }
     : null;
 
   return {
