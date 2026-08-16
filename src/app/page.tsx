@@ -10,7 +10,7 @@ export default function Home() {
       <SaleBanner />
       <Header />
       <main>
-        <ImageSection src="/image/paint.png" alt="Nouveautés" title="Nouveautés" />
+        <ImageSection src="/image/paint.png" alt="Nouveautés" title="Acheter" />
         <Newsletter />
       </main>
       <Footer />

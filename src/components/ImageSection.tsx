@@ -1,3 +1,7 @@
+"use client";
+
+import Link from "next/link";
+
 type ImageSectionProps = {
   src: string;
   alt: string;
@@ -14,9 +18,12 @@ export default function ImageSection({ src, alt, title }: ImageSectionProps) {
           className="w-full h-full object-cover"
         />
       </div>
-      <h1 className="w-full text-center pt-2.5 pb-6 font-display text-base font-black tracking-wide uppercase text-boza-black max-[640px]:text-sm max-[640px]:pb-8">
+      <Link
+        href="/catalogue"
+        className="w-full text-center pt-2.5 pb-6 font-display text-base font-black tracking-wide uppercase text-boza-black no-underline cursor-pointer transition-colors duration-300 hover:text-boza-brown max-[640px]:text-sm max-[640px]:pb-8"
+      >
         {title}
-      </h1>
+      </Link>
     </section>
   );
 }
