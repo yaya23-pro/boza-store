@@ -18,12 +18,11 @@ export default function ImageSection({ src, alt, title }: ImageSectionProps) {
           className="w-full h-full object-cover"
         />
       </div>
-      <Link
-        href="/catalogue"
-        className="w-full text-center pt-2.5 pb-6 font-display text-base font-black tracking-wide uppercase text-boza-black no-underline cursor-pointer transition-colors duration-300 hover:text-boza-brown max-[640px]:text-sm max-[640px]:pb-8"
-      >
-        {title}
-      </Link>
+      <h1 className="w-full text-center pt-2.5 pb-6 max-[640px]:pb-8">
+        <Link href="/catalogue" className="font-display text-base font-black tracking-wide uppercase text-boza-black no-underline hover:text-boza-brown max-[640px]:text-sm">
+          {title}
+        </Link>
+      </h1>
     </section>
   );
 }
