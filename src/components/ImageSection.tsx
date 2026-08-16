@@ -7,7 +7,7 @@ type ImageSectionProps = {
 export default function ImageSection({ src, alt, title }: ImageSectionProps) {
   return (
     <section className="relative w-full flex flex-col items-center bg-boza-cream-alt">
-      <div className="w-full h-[90vh] flex justify-center items-center max-[968px]:h-[65vh] max-[640px]:h-[45vh]">
+      <div className="w-full h-[100vh] flex justify-center items-center max-[968px]:h-[65vh] max-[640px]:h-[45vh]">
         <img
           src={src}
           alt={alt}
