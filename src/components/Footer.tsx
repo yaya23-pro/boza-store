@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="border-t border-boza-cream-alt bg-boza-cream max-w-[1700px] mx-auto mt-10 pt-10 pb-5 px-6">
-      <div className="max-w-[500px] mx-auto mb-[60px] grid grid-cols-3 gap-[30px] max-[640px]:grid-cols-2 max-[640px]:gap-x-6 max-[640px]:gap-y-10 max-[420px]:grid-cols-1 max-[420px]:gap-8">
+      <div className="max-w-[500px] mx-auto mb-10 grid grid-cols-3 gap-[30px] max-[640px]:grid-cols-2 max-[640px]:gap-x-8 max-[640px]:gap-y-8 max-[640px]:text-center">
         <div>
           <h3 className="font-display text-[13px] font-black text-boza-black mb-6">Aide</h3>
           <ul className="list-none p-0 m-0">
@@ -31,9 +31,9 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div className="max-[420px]:col-span-1">
+        <div className="max-[640px]:col-span-2">
           <h3 className="font-display text-[13px] font-black text-boza-black mb-6">Réseaux sociaux</h3>
-          <div className="flex gap-3">
+          <div className="flex gap-3 max-[640px]:justify-center">
             <a
               href="#"
               aria-label="Tiktok"
