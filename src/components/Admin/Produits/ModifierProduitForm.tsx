@@ -62,7 +62,7 @@ export default function ModifierProduitForm({ produitId }: { produitId: string }
 
       const { data: variantesData } = await supabase
         .from("variantes")
-        .select("id, couleur, taille, prix, prix_barre, quantite, images(id, url_image)")
+        .select("id, couleur, couleur_hex, taille, prix, prix_barre, quantite, images(id, url_image)")
         .eq("produit_id", produitId);
 
       const formattedVariants: VariantForm[] = (variantesData ?? []).map((v) => {
@@ -70,7 +70,7 @@ export default function ModifierProduitForm({ produitId }: { produitId: string }
         return {
           id: v.id,
           couleur: v.couleur ?? "",
-          hex: "#000000",
+          hex: v.couleur_hex ?? "#000000",
           taille: v.taille ?? "M",
           prix: String(v.prix),
           prixBarre: v.prix_barre != null ? String(v.prix_barre) : "",
@@ -189,6 +189,7 @@ export default function ModifierProduitForm({ produitId }: { produitId: string }
           .from("variantes")
           .update({
             couleur: v.couleur,
+            couleur_hex: v.hex,
             taille: v.taille,
             prix: parseFloat(v.prix),
             prix_barre: v.prixBarre ? parseFloat(v.prixBarre) : null,
@@ -207,6 +208,7 @@ export default function ModifierProduitForm({ produitId }: { produitId: string }
           .insert({
             produit_id: produitId,
             couleur: v.couleur,
+            couleur_hex: v.hex,
             taille: v.taille,
             prix_barre: v.prixBarre ? parseFloat(v.prixBarre) : null,
             prix: parseFloat(v.prix),
