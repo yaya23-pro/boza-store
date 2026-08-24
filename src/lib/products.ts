@@ -18,19 +18,7 @@ export type ProductDetail = {
   variants: ProductVariant[];
 };
 
-const COLOR_HEX_MAP: Record<string, string> = {
-  Crème: "#F7F5F0",
-  Noir: "#0D0D0D",
-  Brun: "#6B4226",
-  Taupe: "#8C857D",
-  Beige: "#E9E6E0",
-  Blanc: "#FFFFFF",
-  Gris: "#8C857D",
-};
-
-function colorToHex(name: string): string {
-  return COLOR_HEX_MAP[name] ?? "#CCCCCC";
-}
+const FALLBACK_HEX = "#CCCCCC";
 
 export async function getProductDetailFromSupabase(id: string): Promise<ProductDetail | null> {
   const supabase = createClient();
@@ -46,6 +34,7 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
         id,
         taille,
         couleur,
+        couleur_hex,
         prix,
         quantite,
         images ( url_image, ordre )
@@ -65,6 +54,7 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
       id: string;
       taille: string | null;
       couleur: string | null;
+      couleur_hex: string | null;
       prix: number;
       quantite: number;
       images: { url_image: string; ordre: number }[];
@@ -99,8 +89,18 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
     }
   }
 
-  const uniqueColors = Array.from(new Set(variantes.map((v) => v.couleur).filter((c): c is string => !!c)));
-  const colors: ProductColor[] = uniqueColors.map((name) => ({ name, hex: colorToHex(name) }));
+  // Construit la liste des couleurs à partir du hex stocké en base (plus de mapping codé en dur)
+  const colorMap = new Map<string, string>();
+  for (const v of variantes) {
+    if (!v.couleur) continue;
+    if (!colorMap.has(v.couleur)) {
+      if (!v.couleur_hex) {
+        console.warn(`Couleur "${v.couleur}" sans couleur_hex renseignée en base — fallback gris utilisé`);
+      }
+      colorMap.set(v.couleur, v.couleur_hex ?? FALLBACK_HEX);
+    }
+  }
+  const colors: ProductColor[] = Array.from(colorMap.entries()).map(([name, hex]) => ({ name, hex }));
 
   const uniqueSizes = Array.from(new Set(variantes.map((v) => v.taille).filter((t): t is string => !!t)));
   const sizes: ProductSize[] = uniqueSizes.map((label) => ({
@@ -123,7 +123,7 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
     images: images.length > 0 ? images : ["/image/placeholder.png"],
     imagesByColor,
     imageColorMap,
-    colors: colors.length > 0 ? colors : [{ name: "Standard", hex: "#CCCCCC" }],
+    colors: colors.length > 0 ? colors : [{ name: "Standard", hex: FALLBACK_HEX }],
     sizes: sizes.length > 0 ? sizes : [{ label: "Unique", available: true }],
     variants,
   };
