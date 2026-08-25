@@ -9,24 +9,24 @@ export async function generateStaticParams() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const { data: produits } = await supabase.from("produits").select("id");
+  const { data: produits } = await supabase.from("produits").select("slug");
 
   return (produits ?? []).map((produit) => ({
-    id: produit.id.toString(),
+    slug: produit.slug.toString(),
   }));
 }
 
 export default async function ProductPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
+  const { slug } = await params;
 
   return (
     <>
       <Header />
-      <ProductDetail productId={id} />
+      <ProductDetail productId={slug} />
       <Footer />
     </>
   );

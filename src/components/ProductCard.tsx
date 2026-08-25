@@ -23,7 +23,7 @@ export default function ProductCard({ product, isFavorite, onToggleFavorite, onQ
 
   return (
     <Link
-      href={`/produit/${product.id}`}
+      href={`/produit/${product.slug}`}
       className="group overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)] h-full relative cursor-pointer"
     >
       <div className="relative overflow-hidden pt-[125%] bg-[#f7fafc]">
