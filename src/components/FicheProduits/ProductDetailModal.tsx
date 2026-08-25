@@ -85,7 +85,7 @@ export default function ProductDetailModal({ productId, onClose }: ProductDetail
           />
 
           <Link
-            href={`/produit/${productDetail.id}`}
+            href={`/produit/${productDetail.slug}`}
             onClick={() => onClose?.()}
             className="text-boza-taupe text-xs font-semibold tracking-wide bg-transparent cursor-pointer transition-all duration-300 flex items-center gap-2 w-fit"
           >

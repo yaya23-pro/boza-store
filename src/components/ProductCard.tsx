@@ -18,7 +18,7 @@ export default function ProductCard({ product, isFavorite, onToggleFavorite, onQ
   const handleQuickBuyClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onQuickBuy(product.id);
+    onQuickBuy(product.slug);
   };
 
   return (
