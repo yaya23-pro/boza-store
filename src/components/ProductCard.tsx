@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { CatalogueProduct } from "@/lib/catalogue";
+import Image from "next/image";
+
 
 interface ProductCardProps {
   product: CatalogueProduct;
@@ -27,10 +29,12 @@ export default function ProductCard({ product, isFavorite, onToggleFavorite, onQ
       className="group overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)] h-full relative cursor-pointer"
     >
       <div className="relative overflow-hidden pt-[125%] bg-[#f7fafc]">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-600 ease-out group-hover:scale-108"
+          fill
+          className="object-cover transition-transform duration-600 ease-out group-hover:scale-108"
+          sizes="(max-width: 768px) 50vw, 25vw"
         />
       </div>
 
