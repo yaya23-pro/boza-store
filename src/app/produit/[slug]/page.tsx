@@ -59,8 +59,35 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProductDetailFromSupabase(slug);
 
+  const inStock = product?.variants.some((v) => v.stock > 0) ?? false;
+
+  const jsonLd = product
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.description,
+        image: product.images,
+        offers: {
+          "@type": "Offer",
+          price: product.price.toFixed(2),
+          priceCurrency: "EUR",
+          availability: inStock
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+          url: `https://boza-store.vercel.app/produit/${product.slug}`,
+        },
+      }
+    : null;
+
   return (
     <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <Header />
       <ProductDetail product={product} />
       <Footer />
