@@ -6,6 +6,7 @@ export type ProductVariant = { id: string; size: string; color: string; stock: n
 
 export type ProductDetail = {
   id: string;
+  slug: string;
   name: string;
   price: number;
   oldPrice?: number;
@@ -20,7 +21,7 @@ export type ProductDetail = {
 
 const FALLBACK_HEX = "#CCCCCC";
 
-export async function getProductDetailFromSupabase(id: string): Promise<ProductDetail | null> {
+export async function getProductDetailFromSupabase(slug: string): Promise<ProductDetail | null> {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -30,6 +31,7 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
       id,
       nom_produit,
       desc_produit,
+      slug,
       variantes (
         id,
         taille,
@@ -41,7 +43,7 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
       )
     `
     )
-    .eq("id", id)
+    .eq("slug", slug)
     .single();
 
   if (error || !data) {
@@ -68,7 +70,6 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
     .map((img) => img.url_image);
   const images = Array.from(new Set(allImages));
 
-  // Regroupe les images par couleur + associe chaque image à sa couleur
   const imagesByColor: Record<string, string[]> = {};
   const imageColorMap: Record<string, string> = {};
 
@@ -89,7 +90,6 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
     }
   }
 
-  // Construit la liste des couleurs à partir du hex stocké en base (plus de mapping codé en dur)
   const colorMap = new Map<string, string>();
   for (const v of variantes) {
     if (!v.couleur) continue;
@@ -117,6 +117,7 @@ export async function getProductDetailFromSupabase(id: string): Promise<ProductD
 
   return {
     id: data.id,
+    slug: data.slug,
     name: data.nom_produit,
     price: prix,
     description: data.desc_produit ?? "",

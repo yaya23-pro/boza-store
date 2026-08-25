@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase";
 
 export type CatalogueProduct = {
   id: string;
+  slug: string;
   name: string;
   category: string;
   image: string;
@@ -12,22 +13,23 @@ export type CatalogueProduct = {
 export async function getCatalogueProducts(): Promise<CatalogueProduct[]> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from("produits")
-    .select(
-      `
-      id,
-      nom_produit,
-      categories ( nom_categorie ),
-      variantes (
-        prix,
-        prix_barre,
-        quantite,
-        images ( url_image, ordre )
-      )
+const { data, error } = await supabase
+  .from("produits")
+  .select(
     `
+    id,
+    nom_produit,
+    slug,
+    categories ( nom_categorie ),
+    variantes (
+      prix,
+      prix_barre,
+      quantite,
+      images ( url_image, ordre )
     )
-    .order("created_at", { ascending: false });
+  `
+  )
+  .order("created_at", { ascending: false });
 
   if (error || !data) {
     console.error("Erreur chargement produits :", error);
@@ -52,6 +54,7 @@ export async function getCatalogueProducts(): Promise<CatalogueProduct[]> {
 
     return {
       id: p.id,
+      slug: p.slug,
       name: p.nom_produit,
       category: categorie?.nom_categorie ?? "Autre",
       image,
