@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /panier
+Disallow: /confirmation
+Disallow: /admin
+Disallow: /user
+Disallow: /connexion
+
+Sitemap: https://boza-store.vercel.app/sitemap.xml
