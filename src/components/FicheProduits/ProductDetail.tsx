@@ -22,6 +22,7 @@ export default function ProductDetail({ product }: { product: ProductDetailType 
           imagesByColor={product.imagesByColor}
           selectedColor={selectedColor}
           onColorChange={setSelectedColor}
+          productName={product.name}
         />
 
         <div className="mr-[60px] pl-8 max-[991px]:mr-0 max-[991px]:pl-0 max-[991px]:mt-8">
