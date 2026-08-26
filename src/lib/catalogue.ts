@@ -10,26 +10,37 @@ export type CatalogueProduct = {
   oldPrice?: number;
 };
 
-export async function getCatalogueProducts(): Promise<CatalogueProduct[]> {
+export type Category = {
+  name: string;
+  slug: string;
+};
+
+export async function getCatalogueProducts(categorySlug?: string): Promise<CatalogueProduct[]> {
   const supabase = createClient();
 
-const { data, error } = await supabase
-  .from("produits")
-  .select(
+  let query = supabase
+    .from("produits")
+    .select(
+      `
+      id,
+      nom_produit,
+      slug,
+      categories!inner ( nom_categorie, slug ),
+      variantes (
+        prix,
+        prix_barre,
+        quantite,
+        images ( url_image, ordre )
+      )
     `
-    id,
-    nom_produit,
-    slug,
-    categories ( nom_categorie ),
-    variantes (
-      prix,
-      prix_barre,
-      quantite,
-      images ( url_image, ordre )
     )
-  `
-  )
-  .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false });
+
+  if (categorySlug) {
+    query = query.eq("categories.slug", categorySlug);
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) {
     console.error("Erreur chargement produits :", error);
@@ -37,7 +48,7 @@ const { data, error } = await supabase
   }
 
   return data.map((p) => {
-    const categorie = p.categories as unknown as { nom_categorie: string } | null;
+    const categorie = p.categories as unknown as { nom_categorie: string; slug: string } | null;
     const variantes =
       (p.variantes as { prix: number; prix_barre: number | null; quantite: number; images: { url_image: string; ordre: number }[] }[]) ?? [];
 
@@ -64,12 +75,15 @@ const { data, error } = await supabase
   });
 }
 
-export async function getCategories(): Promise<string[]> {
+export async function getCategories(): Promise<Category[]> {
   const supabase = createClient();
 
-  const { data, error } = await supabase.from("categories").select("nom_categorie").order("nom_categorie");
+  const { data, error } = await supabase
+    .from("categories")
+    .select("nom_categorie, slug")
+    .order("nom_categorie");
 
   if (error || !data) return [];
 
-  return data.map((c) => c.nom_categorie);
+  return data.map((c) => ({ name: c.nom_categorie, slug: c.slug }));
 }
