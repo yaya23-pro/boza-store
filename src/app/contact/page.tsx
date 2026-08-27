@@ -66,7 +66,7 @@ export default function ContactPage() {
             </div>
             <div>
               <div className="text-xs text-boza-taupe uppercase tracking-wide mb-1">Localisation</div>
-              <div className="text-[15px] text-boza-black font-semibold leading-relaxed">temara, Maroc</div>
+              <div className="text-[15px] text-boza-black font-semibold leading-relaxed">Salé, Maroc</div>
             </div>
           </div>
 

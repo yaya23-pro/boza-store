@@ -1,6 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Politique de confidentialité - BOZA",
+  description: "Découvrez comment BOZA collecte, utilise et protège tes données personnelles lors de tes achats sur notre boutique streetwear.",
+};
 const sections = [
   {
     id: "donnees-collectees",

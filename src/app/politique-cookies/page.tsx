@@ -1,6 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Politique de cookies - BOZA",
+  description: "Découvre quels cookies BOZA utilise sur son site et comment gérer tes préférences de navigation.",
+};
 const tocItems = [
   { href: "#definition", label: "Qu'est-ce qu'un cookie ?" },
   { href: "#types", label: "Les types de cookies que nous utilisons" },
@@ -106,7 +111,7 @@ export default function CookiePolicyPage() {
             <strong className="block mb-2">BOZA</strong>
             E-mail : contact@boza-store.com
             <br />
-            Adresse : Temara, Maroc
+            Adresse : salé, Maroc
           </div>
         </div>
       </div>
