@@ -1,5 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "À propos - BOZA",
+  description: "Découvre l'histoire de BOZA, marque streetwear premium née de la diaspora africaine, pensée et fabriquée au Maroc.",
+};
 
 const values = [
   {
