@@ -28,6 +28,9 @@ export async function generateMetadata({
   return {
     title: `${match.name} - BOZA`,
     description: `Découvrez la collection ${match.name} chez BOZA, boutique streetwear premium.`,
+    alternates: {
+      canonical: `https://boza-store.vercel.app/catalogue/${categorie}`,
+    },
   };
 }
 

@@ -36,6 +36,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: {
+      canonical: `https://boza-store.vercel.app/produit/${product.slug}`,
+    },
     openGraph: {
       title,
       description,

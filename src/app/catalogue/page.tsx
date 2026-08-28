@@ -9,6 +9,9 @@ import { getCatalogueProducts, getCategories } from "@/lib/catalogue";
 export const metadata: Metadata = {
   title: "Catalogue - BOZA",
   description: "Découvrez toute la collection BOZA : bonnets, joggings, ensembles et tops streetwear premium.",
+  alternates: {
+    canonical: "https://boza-store.vercel.app/catalogue",
+  },
 };
 
 export default async function CataloguePage() {
