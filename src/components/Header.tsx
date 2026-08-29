@@ -1,9 +1,9 @@
-// components/Header.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Menu, User, ShoppingCart, Home, Store, Info, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { createClient } from "@/lib/supabase";
 
@@ -57,9 +57,9 @@ export default function Header() {
               type="button"
               onClick={() => setIsMenuOpen(true)}
               aria-label="Ouvrir le menu"
-              className="flex items-center justify-center p-2 border-0 bg-transparent text-boza-black text-2xl cursor-pointer"
+              className="flex items-center justify-center p-2 border-0 bg-transparent text-boza-black cursor-pointer"
             >
-              <i className="fas fa-bars"></i>
+              <Menu size={22} />
             </button>
           </div>
 
@@ -82,13 +82,13 @@ export default function Header() {
               type="button"
               onClick={handleAccountClick}
               aria-label="Compte"
-              className="relative p-[5px] border-0 bg-transparent text-base text-boza-black cursor-pointer inline-block"
+              className="relative p-[5px] border-0 bg-transparent text-boza-black cursor-pointer inline-flex items-center justify-center"
             >
-              <i className="far fa-user"></i>
+              <User size={18} />
             </button>
 
-            <a href="/panier" aria-label="Panier" className="relative p-[5px] border-0 bg-transparent text-base text-boza-black cursor-pointer inline-block">
-              <i className="fas fa-cart-shopping"></i>
+            <a href="/panier" aria-label="Panier" className="relative p-[5px] border-0 bg-transparent text-boza-black cursor-pointer inline-flex items-center justify-center">
+              <ShoppingCart size={18} />
               {itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 bg-boza-black text-boza-cream min-w-[16px] h-4 rounded-full flex items-center justify-center text-[10px] font-semibold">
                   {itemCount}
@@ -119,9 +119,9 @@ export default function Header() {
             type="button"
             onClick={() => setIsMenuOpen(false)}
             aria-label="Fermer le menu"
-            className="p-2 border-0 bg-transparent text-boza-black text-2xl cursor-pointer"
+            className="p-2 border-0 bg-transparent text-boza-black cursor-pointer"
           >
-            <i className="fas fa-xmark"></i>
+            <X size={22} />
           </button>
         </div>
 
@@ -132,7 +132,7 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
               className="flex items-center gap-4 px-7 py-5 text-boza-black no-underline text-base font-semibold uppercase tracking-wide transition-colors duration-200 hover:bg-boza-cream-alt"
             >
-              <i className="fas fa-house text-boza-taupe w-5 text-center text-lg"></i>
+              <Home size={18} className="text-boza-taupe" />
               Accueil
             </a>
           </li>
@@ -143,7 +143,7 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
               className="flex items-center gap-4 px-7 py-5 text-boza-black no-underline text-base font-semibold uppercase tracking-wide transition-colors duration-200 hover:bg-boza-cream-alt"
             >
-              <i className="fas fa-shop text-boza-taupe w-5 text-center text-lg"></i>
+              <Store size={18} className="text-boza-taupe" />
               Catalogue
             </a>
           </li>
@@ -154,7 +154,7 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
               className="flex items-center gap-4 px-7 py-5 text-boza-black no-underline text-base font-semibold uppercase tracking-wide transition-colors duration-200 hover:bg-boza-cream-alt"
             >
-              <i className="fas fa-circle-info text-boza-taupe w-5 text-center text-lg"></i>
+              <Info size={18} className="text-boza-taupe" />
               À propos de nous
             </a>
           </li>
