@@ -4,6 +4,19 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
+function generateSlug(nom: string): string {
+  const base = nom
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // enlève les accents
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // enlève ponctuation/caractères spéciaux
+    .trim()
+    .replace(/\s+/g, "-"); // remplace les espaces par des tirets
+
+  const suffix = Math.random().toString(36).slice(2, 8); // 6 caractères aléatoires
+  return `${base}-${suffix}`;
+}
+
 type Categorie = {
   id: string;
   nom_categorie: string;
@@ -98,12 +111,13 @@ export default function AjouterProduitForm() {
       .from("produits")
       .insert({
         nom_produit: nomProduit,
+        slug: generateSlug(nomProduit),
         desc_produit: `${descProduit}${composition ? `\nComposition : ${composition}` : ""}${coupe ? `\nCoupe : ${coupe}` : ""}${origine ? `\nOrigine : ${origine}` : ""}`,
         categorie_id: categorieId,
       })
       .select("id")
       .single();
-
+      
     if (produitError || !produitData) {
       setSaving(false);
       setError("Erreur lors de la création du produit : " + produitError?.message);
