@@ -7,6 +7,7 @@ import SuccessBlock from "@/components/Confirmation/SuccessBlock";
 import OrderSummaryConfirmed from "@/components/Confirmation/OrderSummaryConfirmed";
 import DeliveryInfo from "@/components/Confirmation/DeliveryInfo";
 import ConfirmationActions from "@/components/Confirmation/ConfirmationActions";
+import CreateAccountPrompt from "@/components/Confirmation/CreateAccountPrompt";
 
 export default function ConfirmationContent() {
   const searchParams = useSearchParams();
@@ -42,6 +43,11 @@ export default function ConfirmationContent() {
       <OrderSummaryConfirmed items={order.items} total={order.total} />
       <DeliveryInfo address={order.address.ligne} paymentMode={order.paymentMode} />
       <ConfirmationActions />
+      {order.isGuest && order.guestEmail && (
+        <div className="text-left">
+          <CreateAccountPrompt email={order.guestEmail} />
+        </div>
+      )}
     </div>
   );
 }

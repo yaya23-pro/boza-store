@@ -4,21 +4,33 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 
 type ContactSectionProps = {
+  email: string;
+  onEmailChange: (value: string) => void;
   showNewsletterOffer: boolean;
   newsletter: boolean;
   onNewsletterChange: (value: boolean) => void;
 };
 
-export default function ContactSection({ showNewsletterOffer, newsletter, onNewsletterChange }: ContactSectionProps) {
+export default function ContactSection({
+  email,
+  onEmailChange,
+  showNewsletterOffer,
+  newsletter,
+  onNewsletterChange,
+}: ContactSectionProps) {
   const supabase = createClient();
-  const [email, setEmail] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     async function loadEmail() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) setEmail(user.email);
+      if (user?.email) {
+        onEmailChange(user.email);
+        setIsLoggedIn(true);
+      }
     }
     loadEmail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase]);
 
   return (
@@ -42,8 +54,12 @@ export default function ContactSection({ showNewsletterOffer, newsletter, onNews
         <input
           type="email"
           value={email}
-          readOnly
-          className="w-full h-[46px] border border-boza-black px-3.5 text-sm font-body text-boza-black bg-boza-cream-alt outline-none cursor-not-allowed"
+          readOnly={isLoggedIn}
+          onChange={(e) => onEmailChange(e.target.value)}
+          placeholder="ton@email.com"
+          className={`w-full h-[46px] border border-boza-black px-3.5 text-sm font-body text-boza-black outline-none placeholder:text-boza-taupe focus:border-boza-brown ${
+            isLoggedIn ? "bg-boza-cream-alt cursor-not-allowed" : "bg-boza-cream"
+          }`}
         />
       </div>
 

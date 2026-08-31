@@ -14,6 +14,7 @@ export default function CheckoutContent() {
   const supabase = createClient();
   const { items } = useCart();
 
+  const [email, setEmail] = useState("");
   const [shipping, setShipping] = useState({
     pays: "Maroc",
     prenom: "",
@@ -64,8 +65,13 @@ export default function CheckoutContent() {
       return;
     }
 
-    if (!shipping.rue || !shipping.ville) {
-      setError("Merci de renseigner l'adresse et la ville.");
+    if (!email) {
+      setError("Merci de renseigner ton adresse e-mail.");
+      return;
+    }
+
+    if (!shipping.prenom || !shipping.nom || !shipping.rue || !shipping.ville) {
+      setError("Merci de renseigner ton nom, prénom, l'adresse et la ville.");
       return;
     }
 
@@ -77,22 +83,21 @@ export default function CheckoutContent() {
     setLoading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      router.push("/connexion");
-      return;
-    }
+    const isGuest = !user;
 
-    // Mise à jour téléphone (+ newsletter uniquement si le client vient de l'accepter)
-    if (newsletter) {
-      await supabase
-        .from("clients")
-        .update({ telephone: shipping.telephone, newsletter: true })
-        .eq("id", user.id);
-    } else {
-      await supabase
-        .from("clients")
-        .update({ telephone: shipping.telephone })
-        .eq("id", user.id);
+    // Mise à jour téléphone (+ newsletter) uniquement si connecté
+    if (user) {
+      if (newsletter) {
+        await supabase
+          .from("clients")
+          .update({ telephone: shipping.telephone, newsletter: true })
+          .eq("id", user.id);
+      } else {
+        await supabase
+          .from("clients")
+          .update({ telephone: shipping.telephone })
+          .eq("id", user.id);
+      }
     }
 
     const montantTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -100,7 +105,7 @@ export default function CheckoutContent() {
     const { data: adresse, error: adresseError } = await supabase
       .from("adresses")
       .insert({
-        client_id: user.id,
+        client_id: user ? user.id : null,
         rue: shipping.rue,
         ville: shipping.ville,
         code_postal: shipping.codePostal || null,
@@ -133,7 +138,10 @@ export default function CheckoutContent() {
     const { data: commande, error: commandeError } = await supabase
       .from("commandes")
       .insert({
-        client_id: user.id,
+        client_id: isGuest ? null : user!.id,
+        guest_email: isGuest ? email : null,
+        guest_nom_prenom: isGuest ? `${shipping.prenom} ${shipping.nom}` : null,
+        guest_telephone: isGuest ? shipping.telephone : null,
         adresse_id: adresse.id,
         paiement_id: paiementId,
         montant_total: montantTotal,
@@ -165,24 +173,42 @@ export default function CheckoutContent() {
       return;
     }
 
-    const { data: panier } = await supabase
-      .from("paniers")
-      .select("id")
-      .eq("client_id", user.id)
-      .maybeSingle();
+    // Vider le panier : connecté (par client_id) ou invité (par guest_token cookie)
+    if (user) {
+      const { data: panier } = await supabase
+        .from("paniers")
+        .select("id")
+        .eq("client_id", user.id)
+        .maybeSingle();
 
-    if (panier) {
-      await supabase.from("lignes_panier").delete().eq("panier_id", panier.id);
+      if (panier) {
+        await supabase.from("lignes_panier").delete().eq("panier_id", panier.id);
+      }
+    } else {
+      const guestToken = document.cookie.match(/(^| )boza_guest_token=([^;]+)/)?.[2];
+      if (guestToken) {
+        const { data: panier } = await supabase
+          .from("paniers")
+          .select("id")
+          .eq("guest_token", guestToken)
+          .maybeSingle();
+
+        if (panier) {
+          await supabase.from("lignes_panier").delete().eq("panier_id", panier.id);
+        }
+      }
     }
 
     setLoading(false);
-    router.push(`/confirmation?commande=${commande.id}`);
+    router.push(`/confirmation?commande=${commande.id}${isGuest ? `&email=${encodeURIComponent(email)}` : ""}`);
   };
 
   return (
     <div className="flex min-h-[calc(100vh-70px)] items-start max-[968px]:flex-col">
       <div className="flex-1 max-w-[50%] mx-auto p-[50px_90px] bg-boza-cream max-[968px]:max-w-full max-[968px]:w-full max-[968px]:p-[30px_24px]">
         <ContactSection
+          email={email}
+          onEmailChange={setEmail}
           showNewsletterOffer={!newsletter}
           newsletter={newsletter}
           onNewsletterChange={setNewsletter}

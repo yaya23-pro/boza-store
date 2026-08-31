@@ -13,6 +13,8 @@ export type OrderConfirmation = {
   total: string;
   address: { nomPrenom: string; ligne: string };
   paymentMode: string;
+  isGuest: boolean;
+  guestEmail: string | null;
 };
 
 export async function getOrderConfirmation(commandeId: string): Promise<OrderConfirmation | null> {
@@ -24,6 +26,8 @@ export async function getOrderConfirmation(commandeId: string): Promise<OrderCon
       id,
       numero_facture,
       montant_total,
+      client_id,
+      guest_email,
       adresses ( rue, ville, code_postal, pays ),
       paiements ( mode ),
       lignes_commande (
@@ -72,5 +76,7 @@ export async function getOrderConfirmation(commandeId: string): Promise<OrderCon
       ligne: `${adresse?.rue ?? ""}, ${adresse?.ville ?? ""}${adresse?.code_postal ? " " + adresse.code_postal : ""}, ${adresse?.pays ?? ""}`,
     },
     paymentMode: paymentLabels[paiement?.mode] ?? paiement?.mode ?? "",
+    isGuest: !commande.client_id,
+    guestEmail: commande.guest_email,
   };
 }

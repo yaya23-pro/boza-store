@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { getOrCreateGuestToken, getGuestToken, clearGuestToken } from "@/lib/guestCart";
 
 export type CartLine = {
   id: string;
@@ -33,57 +34,157 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [panierId, setPanierId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadCart = useCallback(async () => {
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
+  const mergeGuestCart = useCallback(async (userId: string) => {
+    const guestToken = getGuestToken();
+    if (!guestToken) return;
 
-    if (!user) {
-      setItems([]);
-      setPanierId(null);
-      setLoading(false);
-      return;
-    }
-
-    // Ne pas gérer de panier pour les comptes admin
-    const { data: adminCheck } = await supabase
-      .from("admins")
-      .select("id")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (adminCheck) {
-      setItems([]);
-      setPanierId(null);
-      setLoading(false);
-      return;
-    }
-
-    let { data: panier } = await supabase
+    const { data: guestPanier } = await supabase
       .from("paniers")
       .select("id")
-      .eq("client_id", user.id)
+      .eq("guest_token", guestToken)
       .maybeSingle();
 
-    if (!panier) {
+    if (!guestPanier) {
+      clearGuestToken();
+      return;
+    }
+
+    const { data: guestLignes } = await supabase
+      .from("lignes_panier")
+      .select("id, variante_id, quantite")
+      .eq("panier_id", guestPanier.id);
+
+    if (!guestLignes || guestLignes.length === 0) {
+      await supabase.from("paniers").delete().eq("id", guestPanier.id);
+      clearGuestToken();
+      return;
+    }
+
+    let { data: userPanier } = await supabase
+      .from("paniers")
+      .select("id")
+      .eq("client_id", userId)
+      .maybeSingle();
+
+    if (!userPanier) {
       const { data: newPanier, error } = await supabase
         .from("paniers")
-        .insert({ client_id: user.id })
+        .insert({ client_id: userId })
         .select("id")
         .single();
 
       if (error) {
-        if (error.code === "23503") {
-          console.warn("Utilisateur sans profil client, panier ignoré.");
-          setItems([]);
-          setPanierId(null);
-          setLoading(false);
-          return;
-        }
-        console.error("Erreur création panier :", error);
+        console.error("Erreur création panier lors de la fusion :", error);
+        return;
+      }
+      userPanier = newPanier;
+    }
+
+    const { data: userLignes } = await supabase
+      .from("lignes_panier")
+      .select("id, variante_id, quantite")
+      .eq("panier_id", userPanier.id);
+
+    for (const guestLigne of guestLignes) {
+      const existingUserLigne = (userLignes ?? []).find((l) => l.variante_id === guestLigne.variante_id);
+
+      if (existingUserLigne) {
+        await supabase
+          .from("lignes_panier")
+          .update({ quantite: existingUserLigne.quantite + guestLigne.quantite })
+          .eq("id", existingUserLigne.id);
+      } else {
+        await supabase
+          .from("lignes_panier")
+          .insert({
+            panier_id: userPanier.id,
+            variante_id: guestLigne.variante_id,
+            quantite: guestLigne.quantite,
+          });
+      }
+    }
+
+    await supabase.from("lignes_panier").delete().eq("panier_id", guestPanier.id);
+    await supabase.from("paniers").delete().eq("id", guestPanier.id);
+    clearGuestToken();
+  }, [supabase]);
+
+  const loadCart = useCallback(async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: adminCheck } = await supabase
+        .from("admins")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (adminCheck) {
+        setItems([]);
+        setPanierId(null);
         setLoading(false);
         return;
       }
-      panier = newPanier;
+    }
+
+    let panier = null;
+
+    if (user) {
+      const { data: existingPanier } = await supabase
+        .from("paniers")
+        .select("id")
+        .eq("client_id", user.id)
+        .maybeSingle();
+
+      panier = existingPanier;
+
+      if (!panier) {
+        const { data: newPanier, error } = await supabase
+          .from("paniers")
+          .insert({ client_id: user.id })
+          .select("id")
+          .single();
+
+        if (error) {
+          if (error.code === "23503") {
+            console.warn("Utilisateur sans profil client, panier ignoré.");
+            setItems([]);
+            setPanierId(null);
+            setLoading(false);
+            return;
+          }
+          console.error("Erreur création panier :", error);
+          setLoading(false);
+          return;
+        }
+        panier = newPanier;
+      }
+    } else {
+      const guestToken = getOrCreateGuestToken();
+
+      const { data: existingPanier } = await supabase
+        .from("paniers")
+        .select("id")
+        .eq("guest_token", guestToken)
+        .maybeSingle();
+
+      panier = existingPanier;
+
+      if (!panier) {
+        const { data: newPanier, error } = await supabase
+          .from("paniers")
+          .insert({ guest_token: guestToken })
+          .select("id")
+          .single();
+
+        if (error) {
+          console.error("Erreur création panier invité :", error);
+          setLoading(false);
+          return;
+        }
+        panier = newPanier;
+      }
     }
 
     setPanierId(panier.id);
@@ -135,16 +236,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [loadCart]);
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
-        loadCart();
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        await mergeGuestCart(session.user.id);
+        await loadCart();
+      } else if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        await loadCart();
       }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, loadCart]);
+  }, [supabase, loadCart, mergeGuestCart]);
 
   const addItem = async (varianteId: string, quantity: number) => {
     if (!panierId) return;

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { createClient } from "@/lib/supabase";
 import { ProductColor, ProductVariant } from "@/lib/products";
 
 type SizeOption = { label: string; available: boolean };
@@ -28,7 +27,6 @@ export default function ProductOptions({
   onColorChange,
 }: ProductOptionsProps) {
   const router = useRouter();
-  const supabase = createClient();
   const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState(sizes.find((s) => s.available)?.label ?? sizes[0]?.label ?? "");
   const [quantity, setQuantity] = useState(1);
@@ -36,14 +34,8 @@ export default function ProductOptions({
   const [error, setError] = useState<string | null>(null);
   const [buying, setBuying] = useState(false);
 
-  const resolveVariant = async (): Promise<{ id: string } | null> => {
+  const resolveVariant = (): { id: string } | null => {
     setError(null);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      router.push(`/connexion?next=${encodeURIComponent(window.location.pathname)}`);
-      return null;
-    }
 
     const variant = variants.find((v) => v.size === selectedSize && v.color === selectedColor);
     if (!variant) {
@@ -55,7 +47,7 @@ export default function ProductOptions({
   };
 
   const handleAddToCart = async () => {
-    const variant = await resolveVariant();
+    const variant = resolveVariant();
     if (!variant) return;
 
     await addItem(variant.id, quantity);
@@ -65,7 +57,7 @@ export default function ProductOptions({
 
   const handleBuyNow = async () => {
     setBuying(true);
-    const variant = await resolveVariant();
+    const variant = resolveVariant();
     if (!variant) {
       setBuying(false);
       return;
