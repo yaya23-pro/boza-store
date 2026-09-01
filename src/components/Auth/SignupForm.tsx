@@ -143,8 +143,8 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             className="w-4 h-4 mt-0.5 accent-boza-black shrink-0"
           />
           <span>
-            J&apos;accepte les <a href="/cgv" className="text-boza-black font-semibold">Conditions d&apos;achat</a> et la{" "}
-            <a href="/confidentialite" className="text-boza-black font-semibold">Politique de confidentialité</a> de BOZA
+            J&apos;accepte les <a href="/conditions-de-vente" className="text-boza-black font-semibold">Conditions d&apos;achat</a> et la{" "}
+            <a href="/politique-de-confidentialite" className="text-boza-black font-semibold">Politique de confidentialité</a> de BOZA
           </span>
         </div>
 
