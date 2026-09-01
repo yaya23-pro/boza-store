@@ -28,6 +28,8 @@ export default function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const montantTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
   useEffect(() => {
     async function loadClient() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -57,35 +59,26 @@ export default function CheckoutContent() {
     setShipping((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (method: "card" | "paypal" | "cod") => {
-    setError(null);
-
-    if (method !== "cod") {
-      setError("Ce mode de paiement n'est pas encore disponible. Choisis 'Paiement à la livraison'.");
-      return;
-    }
-
+  const validateForm = (): boolean => {
     if (!email) {
       setError("Merci de renseigner ton adresse e-mail.");
-      return;
+      return false;
     }
-
     if (!shipping.prenom || !shipping.nom || !shipping.rue || !shipping.ville) {
       setError("Merci de renseigner ton nom, prénom, l'adresse et la ville.");
-      return;
+      return false;
     }
-
     if (items.length === 0) {
       setError("Ton panier est vide.");
-      return;
+      return false;
     }
+    return true;
+  };
 
-    setLoading(true);
-
+  const createOrderRecord = async (paiementMode: "a_la_livraison" | "paypal", paiementStatut: "en_attente" | "paye") => {
     const { data: { user } } = await supabase.auth.getUser();
     const isGuest = !user;
 
-    // Mise à jour téléphone (+ newsletter) uniquement si connecté
     if (user) {
       if (newsletter) {
         await supabase
@@ -99,8 +92,6 @@ export default function CheckoutContent() {
           .eq("id", user.id);
       }
     }
-
-    const montantTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const { data: adresse, error: adresseError } = await supabase
       .from("adresses")
@@ -117,22 +108,18 @@ export default function CheckoutContent() {
 
     if (adresseError || !adresse) {
       console.error("Erreur adresse :", adresseError);
-      setLoading(false);
-      setError(adresseError?.message ?? "Erreur lors de l'enregistrement de l'adresse.");
-      return;
+      throw new Error(adresseError?.message ?? "Erreur lors de l'enregistrement de l'adresse.");
     }
 
     const paiementId = crypto.randomUUID();
 
     const { error: paiementError } = await supabase
       .from("paiements")
-      .insert({ id: paiementId, mode: "a_la_livraison", statut: "en_attente", montant: montantTotal });
+      .insert({ id: paiementId, mode: paiementMode, statut: paiementStatut, montant: montantTotal });
 
     if (paiementError) {
       console.error("Erreur paiement :", paiementError);
-      setLoading(false);
-      setError(paiementError.message);
-      return;
+      throw new Error(paiementError.message);
     }
 
     const { data: commande, error: commandeError } = await supabase
@@ -152,9 +139,7 @@ export default function CheckoutContent() {
 
     if (commandeError || !commande) {
       console.error("Erreur commande :", commandeError);
-      setLoading(false);
-      setError(commandeError?.message ?? "Erreur lors de la création de la commande.");
-      return;
+      throw new Error(commandeError?.message ?? "Erreur lors de la création de la commande.");
     }
 
     const lignes = items.map((item) => ({
@@ -168,12 +153,9 @@ export default function CheckoutContent() {
 
     if (lignesError) {
       console.error("Erreur lignes commande :", lignesError);
-      setLoading(false);
-      setError(lignesError.message);
-      return;
+      throw new Error(lignesError.message);
     }
 
-    // Vider le panier : connecté (par client_id) ou invité (par guest_token cookie)
     if (user) {
       const { data: panier } = await supabase
         .from("paniers")
@@ -199,8 +181,44 @@ export default function CheckoutContent() {
       }
     }
 
-    setLoading(false);
     router.push(`/confirmation?commande=${commande.id}${isGuest ? `&email=${encodeURIComponent(email)}` : ""}`);
+  };
+
+  const handleSubmit = async (method: "card" | "paypal" | "cod") => {
+    setError(null);
+
+    if (method === "card") {
+      setError("Ce mode de paiement n'est pas encore disponible.");
+      return;
+    }
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      await createOrderRecord("a_la_livraison", "en_attente");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaypalApprove = async () => {
+    setError(null);
+
+    if (!validateForm()) {
+      throw new Error("Formulaire incomplet.");
+    }
+
+    setLoading(true);
+    try {
+      await createOrderRecord("paypal", "paye");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -214,7 +232,13 @@ export default function CheckoutContent() {
           onNewsletterChange={setNewsletter}
         />
         <ShippingSection values={shipping} onChange={handleChange} />
-        <PaymentSection onSubmit={handleSubmit} loading={loading} error={error} />
+        <PaymentSection
+          onSubmit={handleSubmit}
+          loading={loading}
+          error={error}
+          total={montantTotal}
+          onPaypalApprove={handlePaypalApprove}
+        />
       </div>
 
       <div className="w-1/2 mx-auto bg-boza-cream-alt p-[50px_90px] sticky top-0 h-fit max-[968px]:max-w-full max-[968px]:w-full max-[968px]:p-[30px_24px] max-[968px]:order-first max-[968px]:static">

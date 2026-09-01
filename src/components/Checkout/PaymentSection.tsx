@@ -1,15 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 type PaymentSectionProps = {
   onSubmit: (method: "card" | "paypal" | "cod") => void;
   loading: boolean;
   error: string | null;
+  total: number;
+  onPaypalApprove: (paypalOrderId: string) => Promise<void>;
 };
 
-export default function PaymentSection({ onSubmit, loading, error }: PaymentSectionProps) {
+export default function PaymentSection({ onSubmit, loading, error, total, onPaypalApprove }: PaymentSectionProps) {
   const [method, setMethod] = useState<"card" | "paypal" | "cod">("cod");
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
 
   return (
     <>
@@ -58,6 +64,54 @@ export default function PaymentSection({ onSubmit, loading, error }: PaymentSect
           <span className="font-bold italic text-boza-brown">PayPal</span>
         </div>
 
+        {method === "paypal" && paypalClientId && (
+          <div className="p-4">
+            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "EUR" }}>
+              <PayPalButtons
+                style={{ layout: "vertical" }}
+                disabled={loading}
+                createOrder={async () => {
+                  setPaypalError(null);
+                  const res = await fetch("/api/paypal/create-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount: total }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) {
+                    setPaypalError(data.error ?? "Erreur PayPal.");
+                    throw new Error(data.error ?? "Erreur PayPal.");
+                  }
+                  return data.id;
+                }}
+                onApprove={async (data) => {
+                  try {
+                    const res = await fetch("/api/paypal/capture-order", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ orderId: data.orderID }),
+                    });
+                    const captureData = await res.json();
+                    if (!res.ok) {
+                      setPaypalError(captureData.error ?? "Erreur lors de la capture du paiement.");
+                      return;
+                    }
+                    await onPaypalApprove(data.orderID);
+                  } catch (err) {
+                    console.error("Erreur onApprove PayPal :", err);
+                    setPaypalError("Une erreur est survenue lors du paiement.");
+                  }
+                }}
+                onError={(err) => {
+                  console.error("Erreur PayPal :", err);
+                  setPaypalError("Une erreur est survenue avec PayPal.");
+                }}
+              />
+            </PayPalScriptProvider>
+            {paypalError && <p className="text-boza-brown text-sm mt-3">{paypalError}</p>}
+          </div>
+        )}
+
         <div
           onClick={() => setMethod("cod")}
           className="flex items-center justify-between p-4 font-bold text-sm border-t border-boza-black cursor-pointer"
@@ -79,13 +133,15 @@ export default function PaymentSection({ onSubmit, loading, error }: PaymentSect
 
       {error && <p className="text-boza-brown text-sm mb-4">{error}</p>}
 
-      <button
-        onClick={() => onSubmit(method)}
-        disabled={loading}
-        className="w-full h-[54px] bg-boza-black text-boza-cream border border-boza-black font-bold text-[15px] uppercase tracking-wide cursor-pointer mt-2.5 transition-all duration-300 hover:bg-boza-brown hover:border-boza-brown disabled:opacity-60"
-      >
-        {loading ? "Validation..." : "Payer maintenant"}
-      </button>
+      {method !== "paypal" && (
+        <button
+          onClick={() => onSubmit(method)}
+          disabled={loading}
+          className="w-full h-[54px] bg-boza-black text-boza-cream border border-boza-black font-bold text-[15px] uppercase tracking-wide cursor-pointer mt-2.5 transition-all duration-300 hover:bg-boza-brown hover:border-boza-brown disabled:opacity-60"
+        >
+          {loading ? "Validation..." : "Payer maintenant"}
+        </button>
+      )}
     </>
   );
 }
