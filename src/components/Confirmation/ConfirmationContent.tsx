@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getOrderConfirmation, OrderConfirmation } from "@/lib/confirmation";
 import SuccessBlock from "@/components/Confirmation/SuccessBlock";
@@ -15,6 +15,8 @@ export default function ConfirmationContent() {
 
   const [order, setOrder] = useState<OrderConfirmation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAccountPrompt, setShowAccountPrompt] = useState(false);
+  const accountPromptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -29,6 +31,13 @@ export default function ConfirmationContent() {
     load();
   }, [commandeId]);
 
+  const handleTrackOrderClick = () => {
+    setShowAccountPrompt(true);
+    setTimeout(() => {
+      accountPromptRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
   if (loading) {
     return <div className="max-w-[700px] mx-auto px-6 pt-[60px] pb-10 text-center text-boza-taupe">Chargement...</div>;
   }
@@ -42,9 +51,11 @@ export default function ConfirmationContent() {
       <SuccessBlock orderNumber={order.orderNumber} />
       <OrderSummaryConfirmed items={order.items} total={order.total} />
       <DeliveryInfo address={order.address.ligne} paymentMode={order.paymentMode} />
-      <ConfirmationActions />
-      {order.isGuest && order.guestEmail && (
-        <div className="text-left">
+      <ConfirmationActions
+        onTrackOrderClick={order.isGuest ? handleTrackOrderClick : undefined}
+      />
+      {order.isGuest && order.guestEmail && showAccountPrompt && (
+        <div ref={accountPromptRef} className="text-left">
           <CreateAccountPrompt email={order.guestEmail} />
         </div>
       )}
