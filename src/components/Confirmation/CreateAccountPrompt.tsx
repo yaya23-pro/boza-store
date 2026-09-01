@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createAccountAndLinkOrders } from "@/lib/guestAccount";
 
-export default function CreateAccountPrompt({ email }: { email: string }) {
+type CreateAccountPromptProps = {
+  email: string;
+  commandeId: string;
+};
+
+export default function CreateAccountPrompt({ email, commandeId }: CreateAccountPromptProps) {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [nomPrenom, setNomPrenom] = useState("");
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,18 +34,8 @@ export default function CreateAccountPrompt({ email }: { email: string }) {
       return;
     }
 
-    setDone(true);
+    router.push(`/user/commandes?id=${commandeId}`);
   };
-
-  if (done) {
-    return (
-      <div className="bg-boza-cream-alt border border-boza-cream-alt p-6 mt-8 text-center">
-        <p className="text-boza-black text-sm font-semibold">
-          Ton compte a été créé et cette commande y est déjà rattachée. Vérifie ta boîte mail pour confirmer ton adresse.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-boza-cream-alt border border-boza-cream-alt p-6 mt-8">

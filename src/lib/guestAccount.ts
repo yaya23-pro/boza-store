@@ -19,7 +19,6 @@ export async function createAccountAndLinkOrders(
     return { success: false, error: signUpError?.message ?? "Erreur lors de la création du compte." };
   }
 
-  // Rattacher toutes les commandes invité passées avec cet email
   const { error: updateError } = await supabase
     .from("commandes")
     .update({ client_id: data.user.id, guest_email: null, guest_nom_prenom: null, guest_telephone: null })

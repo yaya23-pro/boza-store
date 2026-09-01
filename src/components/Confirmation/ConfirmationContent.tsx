@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getOrderConfirmation, OrderConfirmation } from "@/lib/confirmation";
 import SuccessBlock from "@/components/Confirmation/SuccessBlock";
 import OrderSummaryConfirmed from "@/components/Confirmation/OrderSummaryConfirmed";
@@ -10,6 +10,7 @@ import ConfirmationActions from "@/components/Confirmation/ConfirmationActions";
 import CreateAccountPrompt from "@/components/Confirmation/CreateAccountPrompt";
 
 export default function ConfirmationContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const commandeId = searchParams.get("commande");
 
@@ -32,10 +33,16 @@ export default function ConfirmationContent() {
   }, [commandeId]);
 
   const handleTrackOrderClick = () => {
-    setShowAccountPrompt(true);
-    setTimeout(() => {
-      accountPromptRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
+    if (!commandeId) return;
+
+    if (order?.isGuest) {
+      setShowAccountPrompt(true);
+      setTimeout(() => {
+        accountPromptRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    } else {
+      router.push(`/user/commandes?id=${commandeId}`);
+    }
   };
 
   if (loading) {
@@ -51,12 +58,10 @@ export default function ConfirmationContent() {
       <SuccessBlock orderNumber={order.orderNumber} />
       <OrderSummaryConfirmed items={order.items} total={order.total} />
       <DeliveryInfo address={order.address.ligne} paymentMode={order.paymentMode} />
-      <ConfirmationActions
-        onTrackOrderClick={order.isGuest ? handleTrackOrderClick : undefined}
-      />
-      {order.isGuest && order.guestEmail && showAccountPrompt && (
+      <ConfirmationActions onTrackOrderClick={handleTrackOrderClick} />
+      {order.isGuest && order.guestEmail && showAccountPrompt && commandeId && (
         <div ref={accountPromptRef} className="text-left">
-          <CreateAccountPrompt email={order.guestEmail} />
+          <CreateAccountPrompt email={order.guestEmail} commandeId={commandeId} />
         </div>
       )}
     </div>
