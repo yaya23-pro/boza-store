@@ -1,11 +1,12 @@
+import Link from "next/link";
 export default function AdminHeader() {
   return (
     <header className="bg-boza-cream border-b border-boza-cream-alt sticky top-0 z-[1000]">
       <nav className="py-2.5">
         <div className="container mx-auto flex items-center justify-between px-6">
-          <a href="/admin/dashboard" className="font-display text-2xl font-black text-boza-black no-underline">
+          <Link href="/admin/dashboard" className="font-display text-2xl font-black text-boza-black no-underline">
             BOZA <span className="text-sm font-body font-semibold text-boza-taupe tracking-normal">Admin</span>
-          </a>
+          </Link>
           <div className="flex items-center gap-2.5">
             <button aria-label="Notifications" className="relative p-[5px] text-boza-black">
               <i className="far fa-bell"></i>
@@ -13,9 +14,9 @@ export default function AdminHeader() {
                 2
               </span>
             </button>
-            <a href="/" aria-label="Voir le site" className="p-[5px] text-boza-black inline-block">
+            <Link href="/" aria-label="Voir le site" className="p-[5px] text-boza-black inline-block">
               <i className="fas fa-external-link-alt"></i>
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

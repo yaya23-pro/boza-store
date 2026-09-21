@@ -8,6 +8,8 @@ export type CatalogueProduct = {
   image: string;
   price: number;
   oldPrice?: number;
+  priceMad: number | null;
+  oldPriceMad?: number | null;
 };
 
 export type Category = {
@@ -28,7 +30,9 @@ export async function getCatalogueProducts(categorySlug?: string): Promise<Catal
       categories!inner ( nom_categorie, slug ),
       variantes (
         prix,
+        prix_mad,
         prix_barre,
+        prix_barre_mad,
         quantite,
         images ( url_image, ordre )
       )
@@ -50,7 +54,14 @@ export async function getCatalogueProducts(categorySlug?: string): Promise<Catal
   return data.map((p) => {
     const categorie = p.categories as unknown as { nom_categorie: string; slug: string } | null;
     const variantes =
-      (p.variantes as { prix: number; prix_barre: number | null; quantite: number; images: { url_image: string; ordre: number }[] }[]) ?? [];
+      (p.variantes as {
+        prix: number;
+        prix_mad: number | null;
+        prix_barre: number | null;
+        prix_barre_mad: number | null;
+        quantite: number;
+        images: { url_image: string; ordre: number }[];
+      }[]) ?? [];
 
     const cheapest = variantes.reduce<typeof variantes[number] | null>((min, v) => {
       if (!min || v.prix < min.prix) return v;
@@ -58,7 +69,9 @@ export async function getCatalogueProducts(categorySlug?: string): Promise<Catal
     }, null);
 
     const prix = cheapest?.prix ?? 0;
+    const prixMad = cheapest?.prix_mad ?? null;
     const prixBarre = cheapest?.prix_barre ?? undefined;
+    const prixBarreMad = cheapest?.prix_barre_mad ?? undefined;
 
     const allImages = variantes.flatMap((v) => v.images ?? []).sort((a, b) => a.ordre - b.ordre);
     const image = allImages[0]?.url_image ?? "/image/placeholder.png";
@@ -71,6 +84,8 @@ export async function getCatalogueProducts(categorySlug?: string): Promise<Catal
       image,
       price: prix,
       oldPrice: prixBarre && prixBarre > prix ? prixBarre : undefined,
+      priceMad: prixMad,
+      oldPriceMad: prixBarreMad && prixMad && prixBarreMad > prixMad ? prixBarreMad : undefined,
     };
   });
 }

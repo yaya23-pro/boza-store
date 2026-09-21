@@ -1,9 +1,29 @@
+import { PAYS_SUPPORTES, INDICATIFS_TELEPHONIQUES } from "@/lib/devise";
+
 type ShippingSectionProps = {
   values: { pays: string; prenom: string; nom: string; rue: string; ville: string; codePostal: string; telephone: string };
   onChange: (field: string, value: string) => void;
 };
 
+const PAYS_OPTIONS = PAYS_SUPPORTES;
+const INDICATIFS = INDICATIFS_TELEPHONIQUES;
+
 export default function ShippingSection({ values, onChange }: ShippingSectionProps) {
+  const handlePaysChange = (nouveauPays: string) => {
+    onChange("pays", nouveauPays);
+
+    const ancienIndicatif = INDICATIFS[values.pays] ?? "";
+    const nouvelIndicatif = INDICATIFS[nouveauPays] ?? "";
+
+    const resteNumero = values.telephone.startsWith(ancienIndicatif)
+      ? values.telephone.slice(ancienIndicatif.length)
+      : values.telephone.replace(/^\+\d+/, "");
+
+    onChange("telephone", nouvelIndicatif + resteNumero);
+  };
+
+  const codePostalObligatoire = values.pays === "France";
+
   return (
     <>
       <h2 className="font-display text-lg font-black uppercase tracking-wide text-boza-black my-8">Livraison</h2>
@@ -11,15 +31,13 @@ export default function ShippingSection({ values, onChange }: ShippingSectionPro
       <div className="mb-3">
         <select
           value={values.pays}
-          onChange={(e) => onChange("pays", e.target.value)}
+          onChange={(e) => handlePaysChange(e.target.value)}
           className="w-full h-[46px] border border-boza-black px-3.5 text-sm font-body text-boza-black bg-boza-cream outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_14px_center] focus:border-boza-brown"
           style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230D0D0D' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>\")" }}
         >
-          <option>Maroc</option>
-          <option>France</option>
-          <option>Suisse</option>
-          <option>Canada</option>
-          <option>Guinée</option>
+          {PAYS_OPTIONS.map((pays) => (
+            <option key={pays}>{pays}</option>
+          ))}
         </select>
       </div>
 
@@ -53,7 +71,7 @@ export default function ShippingSection({ values, onChange }: ShippingSectionPro
       <div className="grid grid-cols-2 gap-3 mb-3 max-[640px]:grid-cols-1">
         <input
           type="text"
-          placeholder="Code postal (facultatif)"
+          placeholder={codePostalObligatoire ? "Code postal *" : "Code postal (facultatif)"}
           value={values.codePostal}
           onChange={(e) => onChange("codePostal", e.target.value)}
           className="w-full h-[46px] border border-boza-black px-3.5 text-sm font-body text-boza-black bg-boza-cream outline-none placeholder:text-boza-taupe focus:border-boza-brown"

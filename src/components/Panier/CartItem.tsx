@@ -1,3 +1,5 @@
+import { Devise, formatMontant } from "@/lib/devise";
+
 type CartItemProps = {
   image: string;
   name: string;
@@ -5,6 +7,7 @@ type CartItemProps = {
   size: string;
   color: string;
   price: number;
+  devise: Devise;
   quantity: number;
   onIncrement: () => void;
   onDecrement: () => void;
@@ -18,6 +21,7 @@ export default function CartItem({
   size,
   color,
   price,
+  devise,
   quantity,
   onIncrement,
   onDecrement,
@@ -55,7 +59,7 @@ export default function CartItem({
           {"  "}Taille : <span className="font-semibold text-boza-black">{size}</span>
         </div>
         <div className="text-[13px] text-boza-taupe mt-1">
-          Prix unitaire : <span className="font-semibold text-boza-black">{price.toFixed(2).replace(".", ",")} €</span>
+          Prix unitaire : <span className="font-semibold text-boza-black">{formatMontant(price, devise)}</span>
         </div>
 
         <div className="flex justify-between items-end mt-3">
@@ -73,7 +77,7 @@ export default function CartItem({
           </div>
 
           <div className="text-lg font-bold text-boza-black">
-            {(price * quantity).toFixed(2).replace(".", ",")} €
+            {formatMontant(price * quantity, devise)}
           </div>
         </div>
       </div>

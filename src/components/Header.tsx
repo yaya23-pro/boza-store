@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Menu, User, ShoppingCart, Home, Store, Info, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { createClient } from "@/lib/supabase";
+import Link from "next/link";
 
 export default function Header() {
   const { itemCount } = useCart();
@@ -64,9 +65,10 @@ export default function Header() {
           </div>
 
           {/* Centre : logo */}
-          <a href="/" className="flex justify-center">
+          
+          <Link href="/" className="flex justify-center">
             <Image
-              src="/Boza.png"
+              src="/boza.png"
               alt="BOZA STORE"
               width={160}
               height={56}
@@ -74,7 +76,7 @@ export default function Header() {
               style={{ width: "auto" }}
               priority
             />
-          </a>
+          </Link>
 
           {/* Droite : compte + panier */}
           <div className="flex items-center justify-end gap-2.5">
@@ -87,14 +89,14 @@ export default function Header() {
               <User size={18} />
             </button>
 
-            <a href="/panier" aria-label="Panier" className="relative p-[5px] border-0 bg-transparent text-boza-black cursor-pointer inline-flex items-center justify-center">
+            <Link href="/panier" aria-label="Panier" className="relative p-[5px] border-0 bg-transparent text-boza-black cursor-pointer inline-flex items-center justify-center">
               <ShoppingCart size={18} />
               {itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 bg-boza-black text-boza-cream min-w-[16px] h-4 rounded-full flex items-center justify-center text-[10px] font-semibold">
                   {itemCount}
                 </span>
               )}
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

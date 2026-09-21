@@ -28,6 +28,8 @@ type VariantForm = {
   taille: string;
   prix: string;
   prixBarre: string;
+  prixMad: string;
+  prixBarreMad: string;
   quantite: string;
   imageFile: File | null;
   imagePreview: string;
@@ -48,7 +50,7 @@ export default function AjouterProduitForm() {
   const [origine, setOrigine] = useState("");
 
   const [variants, setVariants] = useState<VariantForm[]>([
-    { couleur: "", hex: "#000000", taille: "M", prix: "", prixBarre: "", quantite: "", imageFile: null, imagePreview: "" },
+    { couleur: "", hex: "#000000", taille: "M", prix: "", prixBarre: "", prixMad: "", prixBarreMad: "", quantite: "", imageFile: null, imagePreview: "" },
   ]);
 
   const [saving, setSaving] = useState(false);
@@ -66,7 +68,7 @@ export default function AjouterProduitForm() {
   const addVariant = () => {
     setVariants((prev) => [
       ...prev,
-      { couleur: "", hex: "#000000", taille: "M", prix: "", prixBarre: "", quantite: "", imageFile: null, imagePreview: "" },
+      { couleur: "", hex: "#000000", taille: "M", prix: "", prixBarre: "", prixMad: "", prixBarreMad: "", quantite: "", imageFile: null, imagePreview: "" },
     ]);
   };
 
@@ -98,8 +100,8 @@ export default function AjouterProduitForm() {
     }
 
     for (const v of variants) {
-      if (!v.couleur || !v.prix || !v.quantite) {
-        setError("Chaque variante doit avoir une couleur, un prix et une quantité.");
+      if (!v.couleur || !v.prix || !v.prixMad || !v.quantite) {
+        setError("Chaque variante doit avoir une couleur, un prix en €, un prix en MAD et une quantité.");
         return;
       }
     }
@@ -134,6 +136,8 @@ export default function AjouterProduitForm() {
           taille: v.taille,
           prix: parseFloat(v.prix),
           prix_barre: v.prixBarre ? parseFloat(v.prixBarre) : null,
+          prix_mad: parseFloat(v.prixMad),
+          prix_barre_mad: v.prixBarreMad ? parseFloat(v.prixBarreMad) : null,
           quantite: parseInt(v.quantite, 10),
         })
         .select("id")
@@ -339,6 +343,31 @@ export default function AjouterProduitForm() {
                       value={variant.quantite}
                       onChange={(e) => updateVariant(index, "quantite", e.target.value)}
                       placeholder="24"
+                      className="w-full py-2.5 px-3 border border-boza-black bg-boza-cream text-sm outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-xs text-boza-taupe mb-1.5">Prix (MAD)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={variant.prixMad}
+                      onChange={(e) => updateVariant(index, "prixMad", e.target.value)}
+                      placeholder="950"
+                      className="w-full py-2.5 px-3 border border-boza-black bg-boza-cream text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-boza-taupe mb-1.5">Prix barré (MAD)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={variant.prixBarreMad}
+                      onChange={(e) => updateVariant(index, "prixBarreMad", e.target.value)}
+                      placeholder="1200"
                       className="w-full py-2.5 px-3 border border-boza-black bg-boza-cream text-sm outline-none"
                     />
                   </div>

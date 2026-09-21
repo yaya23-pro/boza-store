@@ -1,8 +1,8 @@
 const features = [
-  { icon: "fa-shipping-fast", title: "Livraison gratuite", desc: "Dès 50€ d'achat" },
+  { icon: "fa-shipping-fast", title: "Livraison gratuite", desc: "Partout, tout le temps" },
   { icon: "fa-undo", title: "Retours gratuits", desc: "30 jours pour changer d'avis" },
   { icon: "fa-lock", title: "Paiement sécurisé", desc: "Transactions cryptées" },
-  { icon: "fa-award", title: "Garantie qualité", desc: "2 ans de garantie" },
+  { icon: "fa-award", title: "Qualité contrôlée", desc: "Produits vérifiés" },
 ];
 
 export default function ProductFeatures() {

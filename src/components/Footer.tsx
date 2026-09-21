@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePays } from "@/context/PaysContext";
+import { PAYS_SUPPORTES, isPaysSupporte } from "@/lib/devise";
 
 function TiktokIcon() {
   return (
@@ -24,15 +28,15 @@ function FacebookIcon() {
   );
 }
 
-function PinterestIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.283 1.194.6 2.169 1.775 2.169 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.056-4.869-4.99-4.869-3.4 0-5.399 2.548-5.399 5.184 0 1.027.395 2.127.889 2.726a.36.36 0 0 1 .083.343c-.091.378-.293 1.194-.332 1.361-.053.218-.173.265-.4.159-1.492-.694-2.424-2.875-2.424-4.627 0-3.769 2.737-7.229 7.892-7.229 4.144 0 7.365 2.953 7.365 6.899 0 4.117-2.595 7.431-6.199 7.431-1.211 0-2.348-.63-2.738-1.373 0 0-.599 2.282-.744 2.84-.269 1.037-1.001 2.339-1.492 3.132 1.124.345 2.32.53 3.559.53 6.62 0 11.987-5.367 11.987-11.987C24.004 5.367 18.637 0 12.017 0z" />
-    </svg>
-  );
-}
+const RESEAUX_SOCIAUX = [
+  { label: "Tiktok", href: "https://www.tiktok.com/@boza.store5", Icon: TiktokIcon },
+  { label: "Instagram", href: "https://www.instagram.com/bozas.tore/", Icon: InstagramIcon },
+  { label: "Facebook", href: "https://www.facebook.com/share/1FPCzNBtRE/", Icon: FacebookIcon },
+];
 
 export default function Footer() {
+  const { pays, setPays } = usePays();
+
   return (
     <footer className="border-t border-boza-cream-alt bg-boza-cream max-w-[1700px] mx-auto mt-10 pt-10 pb-5 px-6">
       <div className="max-w-[500px] mx-auto mb-10 grid grid-cols-3 gap-[30px] max-[640px]:grid-cols-2 max-[640px]:gap-x-8 max-[640px]:gap-y-8 max-[640px]:text-center">
@@ -66,34 +70,18 @@ export default function Footer() {
         <div className="max-[640px]:col-span-2">
           <h3 className="font-display text-[13px] font-black text-boza-black mb-6">Réseaux sociaux</h3>
           <div className="flex gap-3 max-[640px]:justify-center">
-            <a
-              href="#"
-              aria-label="Tiktok"
-              className="w-9 h-9 border border-boza-black flex items-center justify-center text-boza-black transition-all duration-300 hover:bg-boza-black hover:text-boza-cream"
-            >
-              <TiktokIcon />
-            </a>
-            <a
-              href="#"
-              aria-label="Instagram"
-              className="w-9 h-9 border border-boza-black flex items-center justify-center text-boza-black transition-all duration-300 hover:bg-boza-black hover:text-boza-cream"
-            >
-              <InstagramIcon />
-            </a>
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="w-9 h-9 border border-boza-black flex items-center justify-center text-boza-black transition-all duration-300 hover:bg-boza-black hover:text-boza-cream"
-            >
-              <FacebookIcon />
-            </a>
-            <a
-              href="#"
-              aria-label="Pinterest"
-              className="w-9 h-9 border border-boza-black flex items-center justify-center text-boza-black transition-all duration-300 hover:bg-boza-black hover:text-boza-cream"
-            >
-              <PinterestIcon />
-            </a>
+            {RESEAUX_SOCIAUX.map(({ label, href, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="w-9 h-9 border border-boza-black flex items-center justify-center text-boza-black transition-all duration-300 hover:bg-boza-black hover:text-boza-cream"
+              >
+                <Icon />
+              </a>
+            ))}
           </div>
         </div>
       </div>
@@ -109,13 +97,26 @@ export default function Footer() {
           <Link href="/politique-cookies" className="text-boza-taupe text-sm no-underline transition-colors duration-200 hover:text-boza-black">Politique en matière de cookies</Link>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap justify-center">
+        <div className="flex items-center gap-2 flex-wrap justify-center">
           <svg className="w-5 h-5 text-boza-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="2" y1="12" x2="22" y2="12"></line>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
           </svg>
-          <span className="text-boza-black text-sm font-medium">Morocco</span>
+          <select
+            value={pays}
+            onChange={(e) => {
+              if (isPaysSupporte(e.target.value)) setPays(e.target.value);
+            }}
+            aria-label="Choisir le pays de livraison"
+            className="text-boza-black text-sm font-medium bg-transparent border-0 cursor-pointer outline-none"
+          >
+            {PAYS_SUPPORTES.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
           <span className="text-boza-taupe mx-[5px]">|</span>
           <span className="text-boza-black text-sm font-medium">Français</span>
         </div>

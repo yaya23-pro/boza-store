@@ -24,9 +24,9 @@ export default function WishlistPreview({ clientId }: { clientId: string }) {
     <div className="bg-boza-cream border border-boza-cream-alt p-7">
       <div className="flex justify-between items-center mb-5">
         <h2 className="font-display text-lg font-black">Mes favoris</h2>
-        <a href="/user/favoris" className="text-[13px] text-boza-brown font-semibold no-underline hover:underline">
+        <Link href="/user/favoris" className="text-[13px] text-boza-brown font-semibold no-underline hover:underline">
           Voir tout
-        </a>
+        </Link>
       </div>
 
       {items.length === 0 ? (

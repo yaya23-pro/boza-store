@@ -5,13 +5,22 @@ import ProductGallery from "@/components/FicheProduits/ProductGallery";
 import ProductOptions from "@/components/FicheProduits/ProductOptions";
 import ProductFeatures from "@/components/FicheProduits/ProductFeatures";
 import { ProductDetail as ProductDetailType } from "@/lib/products";
+import { usePays } from "@/context/PaysContext";
+import { choisirPrix, formatMontant, getDeviseForPays } from "@/lib/devise";
 
 export default function ProductDetail({ product }: { product: ProductDetailType | null }) {
   const [selectedColor, setSelectedColor] = useState<string>(product?.colors[0]?.name ?? "");
+  const { pays } = usePays();
 
   if (!product) {
     return <div className="container mx-auto px-6 py-20 text-center">Produit introuvable.</div>;
   }
+
+  const devise = getDeviseForPays(pays);
+  const prixAffiche = choisirPrix(product.price, product.priceMad, pays);
+  const ancienPrixAffiche = product.oldPrice
+    ? choisirPrix(product.oldPrice, product.oldPriceMad, pays)
+    : null;
 
   return (
     <div className="container mx-auto px-6 pt-2 pb-4">
@@ -33,16 +42,16 @@ export default function ProductDetail({ product }: { product: ProductDetailType 
           <div className="mb-1">
             <div className="flex items-center gap-4 mb-1">
               <span className="text-2xl font-semibold text-boza-black max-[576px]:text-[2rem]">
-                {product.price.toFixed(2).replace(".", ",")} €
+                {formatMontant(prixAffiche, devise)}
               </span>
-              {product.oldPrice && (
+              {ancienPrixAffiche && (
                 <span className="text-xl text-boza-taupe line-through">
-                  {product.oldPrice.toFixed(2).replace(".", ",")} €
+                  {formatMontant(ancienPrixAffiche, devise)}
                 </span>
               )}
             </div>
             <p className="text-boza-taupe text-[13px]">
-              TVA incluse · Livraison calculée à l&apos;étape suivante
+              TVA incluse · Livraison gratuite
             </p>
           </div>
 

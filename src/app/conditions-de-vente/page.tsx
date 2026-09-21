@@ -26,8 +26,8 @@ const sections = [
     id: "prix",
     title: "3. Prix",
     paragraphs: [
-      "Les prix sont indiqués en euros (€), toutes taxes comprises. BOZA se réserve le droit de modifier ses prix à tout moment, étant entendu que le prix applicable est celui en vigueur au moment de la validation de la commande.",
-      "Les frais de livraison sont indiqués avant la validation finale de la commande et s'ajoutent au prix des produits.",
+      "Les prix sont indiqués en euros (€) pour les livraisons en France, Espagne, Italie et Allemagne, et en dirhams marocains (MAD) pour les livraisons au Maroc, toutes taxes comprises. BOZA se réserve le droit de modifier ses prix à tout moment, étant entendu que le prix applicable est celui en vigueur au moment de la validation de la commande.",
+      "La livraison est offerte, sans condition de montant minimum, et est déjà comprise dans le prix affiché.",
     ],
   },
   {

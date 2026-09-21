@@ -1,12 +1,13 @@
+import Link from "next/link";
+import { Devise, formatMontant } from "@/lib/devise";
+
 type OrderSummaryProps = {
   itemCount: number;
   subtotal: number;
-  discount: number;
-  tax: number;
-  total: number;
+  devise: Devise;
 };
 
-export default function OrderSummary({ itemCount, subtotal, discount, tax, total }: OrderSummaryProps) {
+export default function OrderSummary({ itemCount, subtotal, devise }: OrderSummaryProps) {
   return (
     <div className="bg-boza-cream border border-boza-cream-alt p-[30px] sticky top-5">
       <h3 className="font-display text-xl font-black text-boza-black mb-[25px] pb-5 border-b border-boza-cream-alt">
@@ -15,7 +16,7 @@ export default function OrderSummary({ itemCount, subtotal, discount, tax, total
 
       <div className="flex justify-between items-center mb-[15px] text-sm">
         <span className="text-boza-taupe font-medium">Sous-total ({itemCount} articles)</span>
-        <span className="text-boza-black font-semibold">{subtotal.toFixed(2).replace(".", ",")} €</span>
+        <span className="text-boza-black font-semibold">{formatMontant(subtotal, devise)}</span>
       </div>
 
       <div className="flex justify-between items-center mb-[15px] text-sm">
@@ -23,30 +24,20 @@ export default function OrderSummary({ itemCount, subtotal, discount, tax, total
         <span className="text-boza-black font-semibold">Gratuite</span>
       </div>
 
-      <div className="flex justify-between items-center mb-[15px] text-sm">
-        <span className="text-boza-taupe font-medium">Réduction</span>
-        <span className="text-boza-brown font-semibold">-{discount.toFixed(2).replace(".", ",")} €</span>
-      </div>
-
-      <div className="flex justify-between items-center mb-[15px] text-sm">
-        <span className="text-boza-taupe font-medium">Taxes (TVA 20%)</span>
-        <span className="text-boza-black font-semibold">{tax.toFixed(2).replace(".", ",")} €</span>
-      </div>
-
       <div className="h-px bg-boza-cream-alt my-5"></div>
 
       <div className="flex justify-between items-center p-5 bg-boza-cream-alt my-5">
         <span className="text-base font-semibold text-boza-black">Total</span>
-        <span className="font-display text-2xl font-black text-boza-black">{total.toFixed(2).replace(".", ",")} €</span>
+        <span className="font-display text-2xl font-black text-boza-black">{formatMontant(subtotal, devise)}</span>
       </div>
 
-      <a href="/checkout" className="w-full py-[18px] bg-boza-black text-boza-cream border border-boza-black font-bold text-[15px] uppercase tracking-wide cursor-pointer transition-all duration-300 mb-[15px] hover:bg-boza-brown hover:border-boza-brown text-center no-underline block">
+      <Link href="/checkout" className="w-full py-[18px] bg-boza-black text-boza-cream border border-boza-black font-bold text-[15px] uppercase tracking-wide cursor-pointer transition-all duration-300 mb-[15px] hover:bg-boza-brown hover:border-boza-brown text-center no-underline block">
          Passer la Commande
-      </a>
+      </Link>
 
-      <a href="/catalogue" className="w-full py-4 bg-boza-cream text-boza-black border border-boza-black font-bold text-sm cursor-pointer transition-all duration-300 text-center no-underline block hover:bg-boza-cream-alt">
+      <Link href="/catalogue" className="w-full py-4 bg-boza-cream text-boza-black border border-boza-black font-bold text-sm cursor-pointer transition-all duration-300 text-center no-underline block hover:bg-boza-cream-alt">
         <i className="fas fa-arrow-left"></i> Continuer mes Achats
-      </a>
+      </Link>
 
       <div className="grid grid-cols-2 gap-[15px] mt-[25px] max-[768px]:grid-cols-1">
         <div className="flex items-center gap-2.5 p-3 bg-boza-cream-alt">

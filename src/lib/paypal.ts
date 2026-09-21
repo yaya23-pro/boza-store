@@ -73,3 +73,28 @@ export async function capturePaypalOrder(orderId: string) {
 
   return res.json();
 }
+
+// --- Ajout pour Advanced Card Payments (Hosted Fields) ---
+// Génère un client token à usage unique côté client, nécessaire pour
+// initialiser le SDK PayPal en mode `hosted-fields` (formulaire carte).
+// Appelée depuis /api/paypal/generate-client-token, elle-même appelée
+// par PaymentSection.tsx quand l'utilisateur sélectionne "Carte de crédit".
+export async function generatePaypalClientToken() {
+  const accessToken = await getAccessToken();
+
+  const res = await fetch(`${PAYPAL_API_BASE}/v1/identity/generate-token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "Accept-Language": "en_US",
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Erreur génération client token PayPal : ${err}`);
+  }
+
+  return res.json(); // { client_token, expires_in }
+}

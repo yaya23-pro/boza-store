@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { CatalogueProduct } from "@/lib/catalogue";
 import Image from "next/image";
+import { usePays } from "@/context/PaysContext";
+import { choisirPrix, formatMontant, getDeviseForPays } from "@/lib/devise";
 
 
 interface ProductCardProps {
@@ -11,6 +13,13 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, isFavorite, onToggleFavorite, onQuickBuy }: ProductCardProps) {
+  const { pays } = usePays();
+  const devise = getDeviseForPays(pays);
+  const prixAffiche = choisirPrix(product.price, product.priceMad, pays);
+  const ancienPrixAffiche = product.oldPrice
+    ? choisirPrix(product.oldPrice, product.oldPriceMad, pays)
+    : null;
+
   const handleHeartClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,10 +51,10 @@ export default function ProductCard({ product, isFavorite, onToggleFavorite, onQ
         <h3 className="text-sm font-normal text-black max-[480px]:text-[13px]">{product.name}</h3>
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2.5">
-            <span className="text-lg font-normal text-black max-[480px]:text-base">{product.price}€</span>
-            {product.oldPrice && (
+            <span className="text-lg font-normal text-black max-[480px]:text-base">{formatMontant(prixAffiche, devise)}</span>
+            {ancienPrixAffiche && (
               <span className="text-sm font-normal text-boza-taupe line-through max-[480px]:text-xs">
-                {product.oldPrice}€
+                {formatMontant(ancienPrixAffiche, devise)}
               </span>
             )}
           </div>

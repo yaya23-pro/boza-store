@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { useCart } from "@/context/CartContext";
+import { usePays } from "@/context/PaysContext";
+import { isPaysSupporte, INDICATIFS_TELEPHONIQUES } from "@/lib/devise";
 import ContactSection from "@/components/Checkout/ContactSection";
 import ShippingSection from "@/components/Checkout/ShippingSection";
 import PaymentSection from "@/components/Checkout/PaymentSection";
@@ -13,22 +15,21 @@ export default function CheckoutContent() {
   const router = useRouter();
   const supabase = createClient();
   const { items } = useCart();
+  const { pays: paysDetecte, setPays: setPaysGlobal } = usePays();
 
   const [email, setEmail] = useState("");
   const [shipping, setShipping] = useState({
-    pays: "Maroc",
+    pays: paysDetecte,
     prenom: "",
     nom: "",
     rue: "",
     ville: "",
     codePostal: "",
-    telephone: "+212",
+    telephone: INDICATIFS_TELEPHONIQUES[paysDetecte],
   });
   const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const montantTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   useEffect(() => {
     async function loadClient() {
@@ -47,7 +48,7 @@ export default function CheckoutContent() {
           ...prev,
           prenom: prenom ?? "",
           nom: rest.join(" "),
-          telephone: client.telephone ?? "+212",
+          telephone: client.telephone ?? INDICATIFS_TELEPHONIQUES[paysDetecte],
         }));
         setNewsletter(client.newsletter ?? false);
       }
@@ -57,6 +58,12 @@ export default function CheckoutContent() {
 
   const handleChange = (field: string, value: string) => {
     setShipping((prev) => ({ ...prev, [field]: value }));
+    // Si le client change le pays de livraison, on met aussi à jour le pays
+    // global (cookie + contexte) : ça évite un décalage entre le pays choisi
+    // ici et celui utilisé ailleurs sur le site (devise affichée, prochaine visite).
+    if (field === "pays" && isPaysSupporte(value)) {
+      setPaysGlobal(value);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -68,6 +75,10 @@ export default function CheckoutContent() {
       setError("Merci de renseigner ton nom, prénom, l'adresse et la ville.");
       return false;
     }
+    if (shipping.pays === "France" && !shipping.codePostal.trim()) {
+      setError("Le code postal est obligatoire pour la France.");
+      return false;
+    }
     if (items.length === 0) {
       setError("Ton panier est vide.");
       return false;
@@ -75,128 +86,40 @@ export default function CheckoutContent() {
     return true;
   };
 
-  const createOrderRecord = async (paiementMode: "a_la_livraison" | "paypal", paiementStatut: "en_attente" | "paye") => {
-    const { data: { user } } = await supabase.auth.getUser();
-    const isGuest = !user;
+  const creerCommande = async (mode: "a_la_livraison" | "paypal", paypalOrderId?: string) => {
+    const guestToken = document.cookie.match(/(^| )boza_guest_token=([^;]+)/)?.[2];
 
-    if (user) {
-      if (newsletter) {
-        await supabase
-          .from("clients")
-          .update({ telephone: shipping.telephone, newsletter: true })
-          .eq("id", user.id);
-      } else {
-        await supabase
-          .from("clients")
-          .update({ telephone: shipping.telephone })
-          .eq("id", user.id);
-      }
-    }
+    const res = await fetch("/api/commande/creer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        shipping,
+        items: items.map((item) => ({ varianteId: item.varianteId, quantite: item.quantity })),
+        mode,
+        paypalOrderId,
+        guestToken,
+        newsletter,
+      }),
+    });
 
-    const { data: adresse, error: adresseError } = await supabase
-      .from("adresses")
-      .insert({
-        client_id: user ? user.id : null,
-        rue: shipping.rue,
-        ville: shipping.ville,
-        code_postal: shipping.codePostal || null,
-        pays: shipping.pays,
-        type: "livraison",
-      })
-      .select("id")
-      .single();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Erreur lors de la création de la commande.");
 
-    if (adresseError || !adresse) {
-      console.error("Erreur adresse :", adresseError);
-      throw new Error(adresseError?.message ?? "Erreur lors de l'enregistrement de l'adresse.");
-    }
-
-    const paiementId = crypto.randomUUID();
-
-    const { error: paiementError } = await supabase
-      .from("paiements")
-      .insert({ id: paiementId, mode: paiementMode, statut: paiementStatut, montant: montantTotal });
-
-    if (paiementError) {
-      console.error("Erreur paiement :", paiementError);
-      throw new Error(paiementError.message);
-    }
-
-    const { data: commande, error: commandeError } = await supabase
-      .from("commandes")
-      .insert({
-        client_id: isGuest ? null : user!.id,
-        guest_email: isGuest ? email : null,
-        guest_nom_prenom: isGuest ? `${shipping.prenom} ${shipping.nom}` : null,
-        guest_telephone: isGuest ? shipping.telephone : null,
-        adresse_id: adresse.id,
-        paiement_id: paiementId,
-        montant_total: montantTotal,
-        statut: "en_attente",
-      })
-      .select("id")
-      .single();
-
-    if (commandeError || !commande) {
-      console.error("Erreur commande :", commandeError);
-      throw new Error(commandeError?.message ?? "Erreur lors de la création de la commande.");
-    }
-
-    const lignes = items.map((item) => ({
-      commande_id: commande.id,
-      variante_id: item.varianteId,
-      quantite: item.quantity,
-      prix_unitaire: item.price,
-    }));
-
-    const { error: lignesError } = await supabase.from("lignes_commande").insert(lignes);
-
-    if (lignesError) {
-      console.error("Erreur lignes commande :", lignesError);
-      throw new Error(lignesError.message);
-    }
-
-    if (user) {
-      const { data: panier } = await supabase
-        .from("paniers")
-        .select("id")
-        .eq("client_id", user.id)
-        .maybeSingle();
-
-      if (panier) {
-        await supabase.from("lignes_panier").delete().eq("panier_id", panier.id);
-      }
-    } else {
-      const guestToken = document.cookie.match(/(^| )boza_guest_token=([^;]+)/)?.[2];
-      if (guestToken) {
-        const { data: panier } = await supabase
-          .from("paniers")
-          .select("id")
-          .eq("guest_token", guestToken)
-          .maybeSingle();
-
-        if (panier) {
-          await supabase.from("lignes_panier").delete().eq("panier_id", panier.id);
-        }
-      }
-    }
-
-    router.push(`/confirmation?commande=${commande.id}${isGuest ? `&email=${encodeURIComponent(email)}` : ""}`);
+    router.push(`/confirmation?commande=${data.commandeId}${data.isGuest ? `&email=${encodeURIComponent(email)}` : ""}`);
   };
 
   const handleSubmit = async (method: "card" | "paypal" | "cod") => {
     setError(null);
-
     if (method === "card") {
       setError("Ce mode de paiement n'est pas encore disponible.");
       return;
     }
-
     if (!validateForm()) return;
 
     setLoading(true);
     try {
-      await createOrderRecord("a_la_livraison", "en_attente");
+      await creerCommande("a_la_livraison");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue.");
     } finally {
@@ -204,16 +127,13 @@ export default function CheckoutContent() {
     }
   };
 
-  const handlePaypalApprove = async () => {
+  const handlePaypalApprove = async (paypalOrderId: string) => {
     setError(null);
-
-    if (!validateForm()) {
-      throw new Error("Formulaire incomplet.");
-    }
+    if (!validateForm()) throw new Error("Formulaire incomplet.");
 
     setLoading(true);
     try {
-      await createOrderRecord("paypal", "paye");
+      await creerCommande("paypal", paypalOrderId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue.");
     } finally {
@@ -236,13 +156,14 @@ export default function CheckoutContent() {
           onSubmit={handleSubmit}
           loading={loading}
           error={error}
-          total={montantTotal}
+          items={items}
+          pays={shipping.pays}
           onPaypalApprove={handlePaypalApprove}
         />
       </div>
 
       <div className="w-1/2 mx-auto bg-boza-cream-alt p-[50px_90px] sticky top-0 h-fit max-[968px]:max-w-full max-[968px]:w-full max-[968px]:p-[30px_24px] max-[968px]:order-first max-[968px]:static">
-        <OrderSummarySidebar />
+        <OrderSummarySidebar pays={shipping.pays} />
       </div>
     </div>
   );

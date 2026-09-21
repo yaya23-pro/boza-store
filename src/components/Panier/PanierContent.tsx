@@ -2,18 +2,25 @@
 
 import { useCart } from "@/context/CartContext";
 import CartItem from "@/components/Panier/CartItem";
-import CouponBox from "@/components/Panier/CouponBox";
 import OrderSummary from "@/components/Panier/OrderSummary";
 import EmptyCart from "@/components/Panier/EmptyCart";
 import RecommendedProducts from "@/components/Panier/RecommendedProducts";
+import { usePays } from "@/context/PaysContext";
+import { choisirPrix, getDeviseForPays } from "@/lib/devise";
 
 export default function PanierContent() {
   const { items, incrementItem, decrementItem, removeItem } = useCart();
+  const { pays } = usePays();
+  const devise = getDeviseForPays(pays);
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discount = 0;
-  const tax = (subtotal - discount) * 0.2;
-  const total = subtotal - discount + tax;
+  // Le prix unitaire réel (€ ou MAD) dépend du pays courant : on le calcule
+  // une fois ici, plutôt que de le laisser recalculer par chaque enfant.
+  const itemsAvecPrix = items.map((item) => ({
+    ...item,
+    prixAffiche: choisirPrix(item.price, item.priceMad, pays),
+  }));
+
+  const subtotal = itemsAvecPrix.reduce((sum, item) => sum + item.prixAffiche * item.quantity, 0);
 
   return (
     <section className="py-2 overflow-x-hidden">
@@ -29,20 +36,26 @@ export default function PanierContent() {
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
             <div>
               <div className="bg-boza-cream border border-boza-cream-alt p-[30px] mb-[30px] max-[480px]:p-4">
-                {items.map((item) => (
+                {itemsAvecPrix.map((item) => (
                   <CartItem
                     key={item.id}
-                    {...item}
+                    image={item.image}
+                    name={item.name}
+                    category={item.category}
+                    size={item.size}
+                    color={item.color}
+                    price={item.prixAffiche}
+                    devise={devise}
+                    quantity={item.quantity}
                     onIncrement={() => incrementItem(item.id)}
                     onDecrement={() => decrementItem(item.id)}
                     onRemove={() => removeItem(item.id)}
                   />
                 ))}
               </div>
-              <CouponBox />
             </div>
 
-            <OrderSummary itemCount={items.length} subtotal={subtotal} discount={discount} tax={tax} total={total} />
+            <OrderSummary itemCount={items.length} subtotal={subtotal} devise={devise} />
           </div>
         )}
       </div>

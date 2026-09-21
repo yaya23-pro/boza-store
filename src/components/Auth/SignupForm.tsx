@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import SocialLoginButtons from "@/components/Auth/SocialLoginButtons";
+import Link from "next/link";
 type SignupFormProps = {
   onSwitchToLogin: () => void;
 };
@@ -143,8 +144,8 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             className="w-4 h-4 mt-0.5 accent-boza-black shrink-0"
           />
           <span>
-            J&apos;accepte les <a href="/conditions-de-vente" className="text-boza-black font-semibold">Conditions d&apos;achat</a> et la{" "}
-            <a href="/politique-de-confidentialite" className="text-boza-black font-semibold">Politique de confidentialité</a> de BOZA
+            J&apos;accepte les <Link href="/conditions-de-vente" className="text-boza-black font-semibold">Conditions d&apos;achat</Link> et la{" "}
+            <Link href="/politique-de-confidentialite" className="text-boza-black font-semibold">Politique de confidentialité</Link> de BOZA
           </span>
         </div>
 

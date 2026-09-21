@@ -13,6 +13,7 @@ export type CartLine = {
   size: string;
   color: string;
   price: number;
+  priceMad: number | null;
   quantity: number;
 };
 
@@ -199,6 +200,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           taille,
           couleur,
           prix,
+          prix_mad,
           produits ( nom_produit ),
           images ( url_image, ordre )
         )
@@ -223,6 +225,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         size: v?.taille ?? "",
         color: v?.couleur ?? "",
         price: v?.prix ?? 0,
+        priceMad: v?.prix_mad ?? null,
         quantity: l.quantite,
       };
     });

@@ -10,6 +10,8 @@ export type ProductDetail = {
   name: string;
   price: number;
   oldPrice?: number;
+  priceMad: number | null;
+  oldPriceMad?: number | null;
   description: string;
   images: string[];
   imagesByColor: Record<string, string[]>;
@@ -38,6 +40,9 @@ export async function getProductDetailFromSupabase(slug: string): Promise<Produc
         couleur,
         couleur_hex,
         prix,
+        prix_mad,
+        prix_barre,
+        prix_barre_mad,
         quantite,
         images ( url_image, ordre )
       )
@@ -58,11 +63,25 @@ export async function getProductDetailFromSupabase(slug: string): Promise<Produc
       couleur: string | null;
       couleur_hex: string | null;
       prix: number;
+      prix_mad: number | null;
+      prix_barre: number | null;
+      prix_barre_mad: number | null;
       quantite: number;
       images: { url_image: string; ordre: number }[];
     }[]) ?? [];
 
-  const prix = variantes.length > 0 ? Math.min(...variantes.map((v) => v.prix)) : 0;
+  // On prend la variante la moins chère (en €) comme référence pour l'affichage,
+  // et on lit son prix MAD/prix barré correspondant plutôt que de les recalculer
+  // indépendamment (pour éviter d'afficher deux variantes différentes selon la devise).
+  const referenceVariant =
+    variantes.length > 0
+      ? variantes.reduce((min, v) => (v.prix < min.prix ? v : min), variantes[0])
+      : null;
+
+  const prix = referenceVariant?.prix ?? 0;
+  const prixMad = referenceVariant?.prix_mad ?? null;
+  const prixBarre = referenceVariant?.prix_barre ?? null;
+  const prixBarreMad = referenceVariant?.prix_barre_mad ?? null;
 
   const allImages = variantes
     .flatMap((v) => v.images ?? [])
@@ -120,6 +139,9 @@ export async function getProductDetailFromSupabase(slug: string): Promise<Produc
     slug: data.slug,
     name: data.nom_produit,
     price: prix,
+    oldPrice: prixBarre && prixBarre > prix ? prixBarre : undefined,
+    priceMad: prixMad,
+    oldPriceMad: prixBarreMad && prixMad && prixBarreMad > prixMad ? prixBarreMad : undefined,
     description: data.desc_produit ?? "",
     images: images.length > 0 ? images : ["/image/placeholder.png"],
     imagesByColor,

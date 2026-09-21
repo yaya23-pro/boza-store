@@ -32,7 +32,6 @@ const { data: adminData, error: adminError } = await supabase
   .eq("id", data.user.id)
   .single();
 
-console.log("adminData:", adminData, "adminError:", adminError);
 
 if (!adminData) {
   await supabase.auth.signOut();

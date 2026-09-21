@@ -37,7 +37,7 @@ const faqItems: FaqItem[] = [
     category: "Livraison",
     question: "Livrez-vous en dehors du Maroc ?",
     answer:
-      "Oui, nous livrons dans plusieurs pays. Les frais et délais de livraison varient selon la destination et sont calculés à l'étape du paiement.",
+      "Oui, nous livrons en France, en Espagne, en Italie et en Allemagne, en plus du Maroc. La livraison est gratuite partout ; seul le délai varie selon la destination.",
   },
   {
     id: "retour-comment",

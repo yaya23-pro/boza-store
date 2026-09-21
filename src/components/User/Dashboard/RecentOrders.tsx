@@ -1,4 +1,5 @@
 // components/User/Dashboard/RecentOrders.tsx
+import Link from "next/link";
 "use client";
 
 import { useEffect, useState } from "react";
@@ -59,9 +60,9 @@ export default function RecentOrders({ clientId }: { clientId: string }) {
     <div className="bg-boza-cream border border-boza-cream-alt p-7 mb-6">
       <div className="flex justify-between items-center mb-5">
         <h2 className="font-display text-lg font-black">Commandes récentes</h2>
-        <a href="/user/commandes" className="text-[13px] text-boza-brown font-semibold no-underline hover:underline">
+        <Link href="/user/commandes" className="text-[13px] text-boza-brown font-semibold no-underline hover:underline">
           Voir tout
-        </a>
+        </Link>
       </div>
 
       {orders.map((order) => (
