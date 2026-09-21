@@ -12,8 +12,8 @@ export default function ShippingSection({ values, onChange }: ShippingSectionPro
   const handlePaysChange = (nouveauPays: string) => {
     onChange("pays", nouveauPays);
 
-    const ancienIndicatif = INDICATIFS[values.pays] ?? "";
-    const nouvelIndicatif = INDICATIFS[nouveauPays] ?? "";
+    const ancienIndicatif = INDICATIFS[values.pays as keyof typeof INDICATIFS] ?? "";
+    const nouvelIndicatif = INDICATIFS[nouveauPays as keyof typeof INDICATIFS] ?? "";
 
     const resteNumero = values.telephone.startsWith(ancienIndicatif)
       ? values.telephone.slice(ancienIndicatif.length)
