@@ -1,6 +1,6 @@
+"use client";
 // components/User/Dashboard/RecentOrders.tsx
 import Link from "next/link";
-"use client";
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";

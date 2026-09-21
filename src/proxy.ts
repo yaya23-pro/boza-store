@@ -5,7 +5,7 @@ import { NOM_COOKIE_PAYS, paysDepuisCodeIso, isPaysSupporte } from "@/lib/devise
 // Cette route ne nécessite pas d'être connecté : c'est la page de connexion elle-même.
 const PUBLIC_ADMIN_PATHS = ["/admin/connexion"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // --- 1. Détection du pays (s'applique à tout le site) ---
