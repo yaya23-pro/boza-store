@@ -29,7 +29,7 @@ export default function BrandStory() {
             Il se mesure à l'instant où on a choisi d&apos;y aller quand même.
           </p>
           <Link
-            href="/notre-histoire"
+            href="/a-propos"
             className="inline-flex items-center gap-3 self-start bg-boza-black text-boza-cream px-6 py-3 text-xs font-semibold uppercase tracking-wide hover:bg-boza-brown transition-all duration-300"
           >
             Notre histoire

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import QuickViewModal from "@/components/QuickViewModal";
 import { CatalogueProduct } from "@/lib/catalogue";
 
 interface ProductsSectionProps {
@@ -11,16 +12,12 @@ interface ProductsSectionProps {
 
 export default function ProductsSection({ products }: ProductsSectionProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [quickViewSlug, setQuickViewSlug] = useState<string | null>(null);
 
   const handleToggleFavorite = (productId: string) => {
     setFavorites((prev) =>
       prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
-  };
-
-  const handleQuickBuy = (slug: string) => {
-    console.log("Achat rapide :", slug);
-    // TODO: brancher la logique panier
   };
 
   return (
@@ -30,7 +27,7 @@ export default function ProductsSection({ products }: ProductsSectionProps) {
           Nos Essentiels
         </h2>
         <Link
-          href="/collections"
+          href="/catalogue"
           className="hidden md:flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-boza-black hover:text-boza-brown transition-colors"
         >
           Voir toute la collection
@@ -45,10 +42,12 @@ export default function ProductsSection({ products }: ProductsSectionProps) {
             product={product}
             isFavorite={favorites.includes(product.id)}
             onToggleFavorite={handleToggleFavorite}
-            onQuickBuy={handleQuickBuy}
+            onQuickBuy={setQuickViewSlug}
           />
         ))}
       </div>
+
+      {quickViewSlug && <QuickViewModal productId={quickViewSlug} onClose={() => setQuickViewSlug(null)} />}
     </section>
   );
 }

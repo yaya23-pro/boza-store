@@ -1,35 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { submitContactMessage, ContactFormData } from "@/lib/contact";
+import { useState } from "react";
+import { submitReturnRequest, MOTIFS_RETOUR, ReturnRequestFormData } from "@/lib/retours";
 
-const sujets = [
-  "Question sur une commande",
-  "Question sur un produit",
-  "Retour / Échange",
-  "Collaboration / Partenariat",
-  "Rejoindre l'équipe",
-  "Autre",
-];
-
-export default function ContactForm() {
-  const [formData, setFormData] = useState<ContactFormData>({
-    nom: "",
+export default function ReturnRequestForm() {
+  const [formData, setFormData] = useState<ReturnRequestFormData>({
+    numeroCommande: "",
     email: "",
-    sujet: sujets[0],
-    message: "",
+    motif: MOTIFS_RETOUR[0],
+    description: "",
   });
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  useEffect(() => {
-    const sujetUrl = new URLSearchParams(window.location.search).get("sujet");
-    if (sujetUrl && sujets.includes(sujetUrl)) {
-      setFormData((prev) => ({ ...prev, sujet: sujetUrl }));
-    }
-  }, []);
-
-  function handleChange<K extends keyof ContactFormData>(key: K, value: ContactFormData[K]) {
+  function handleChange<K extends keyof ReturnRequestFormData>(key: K, value: ReturnRequestFormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -38,13 +22,16 @@ export default function ContactForm() {
     setSending(true);
     setResult(null);
 
-    const response = await submitContactMessage(formData);
+    const response = await submitReturnRequest(formData);
 
     setSending(false);
 
     if (response.success) {
-      setResult({ type: "success", text: "Ton message a bien été envoyé. On te répond rapidement !" });
-      setFormData({ nom: "", email: "", sujet: sujets[0], message: "" });
+      setResult({
+        type: "success",
+        text: "Ta demande a bien été envoyée. On revient vers toi par e-mail sous 48h avec la marche à suivre.",
+      });
+      setFormData({ numeroCommande: "", email: "", motif: MOTIFS_RETOUR[0], description: "" });
     } else {
       setResult({ type: "error", text: "Une erreur est survenue. Réessaie dans un instant." });
     }
@@ -54,15 +41,18 @@ export default function ContactForm() {
     <div className="bg-boza-cream border border-boza-cream-alt p-9 max-[640px]:p-6">
       <form onSubmit={handleSubmit}>
         <div className="mb-[18px]">
-          <label className="block text-[13px] font-semibold text-boza-black mb-2">Nom complet</label>
+          <label className="block text-[13px] font-semibold text-boza-black mb-2">Numéro de commande</label>
           <input
             type="text"
             required
-            value={formData.nom}
-            onChange={(e) => handleChange("nom", e.target.value)}
-            placeholder="Ton nom"
+            value={formData.numeroCommande}
+            onChange={(e) => handleChange("numeroCommande", e.target.value)}
+            placeholder="Ex : #A1B2C3D4"
             className="w-full px-4 py-3.5 border border-boza-black bg-boza-cream text-boza-black text-sm outline-none placeholder:text-boza-taupe focus:border-boza-brown"
           />
+          <p className="text-boza-taupe text-xs mt-1.5">
+            Tu le trouves dans l&apos;e-mail de confirmation de ta commande.
+          </p>
         </div>
 
         <div className="mb-[18px]">
@@ -75,28 +65,31 @@ export default function ContactForm() {
             placeholder="ton@email.com"
             className="w-full px-4 py-3.5 border border-boza-black bg-boza-cream text-boza-black text-sm outline-none placeholder:text-boza-taupe focus:border-boza-brown"
           />
+          <p className="text-boza-taupe text-xs mt-1.5">L&apos;adresse utilisée lors de la commande.</p>
         </div>
 
         <div className="mb-[18px]">
-          <label className="block text-[13px] font-semibold text-boza-black mb-2">Sujet</label>
+          <label className="block text-[13px] font-semibold text-boza-black mb-2">Motif du retour</label>
           <select
-            value={formData.sujet}
-            onChange={(e) => handleChange("sujet", e.target.value)}
+            value={formData.motif}
+            onChange={(e) => handleChange("motif", e.target.value)}
             className="w-full px-4 py-3.5 border border-boza-black bg-boza-cream text-boza-black text-sm outline-none focus:border-boza-brown"
           >
-            {sujets.map((s) => (
-              <option key={s} value={s}>{s}</option>
+            {MOTIFS_RETOUR.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="mb-[18px]">
-          <label className="block text-[13px] font-semibold text-boza-black mb-2">Message</label>
+          <label className="block text-[13px] font-semibold text-boza-black mb-2">Explique-nous le problème</label>
           <textarea
             required
-            value={formData.message}
-            onChange={(e) => handleChange("message", e.target.value)}
-            placeholder="Écris ton message ici..."
+            value={formData.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            placeholder="Décris le souci rencontré avec ta commande..."
             className="w-full px-4 py-3.5 border border-boza-black bg-boza-cream text-boza-black text-sm outline-none placeholder:text-boza-taupe focus:border-boza-brown resize-y min-h-[140px]"
           />
         </div>
@@ -119,7 +112,7 @@ export default function ContactForm() {
           disabled={sending}
           className="w-full py-4 bg-boza-black text-boza-cream border border-boza-black font-body text-sm font-bold uppercase tracking-wide cursor-pointer transition-all duration-300 hover:bg-boza-brown hover:border-boza-brown disabled:opacity-50 mt-2"
         >
-          {sending ? "Envoi en cours..." : "Envoyer le message"}
+          {sending ? "Envoi en cours..." : "Envoyer ma demande de retour"}
         </button>
       </form>
     </div>

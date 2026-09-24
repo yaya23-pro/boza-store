@@ -44,7 +44,7 @@ export default function Hero() {
             Des pièces pensées pour celles et ceux qui portent leur histoire.
           </p>
           <Link
-            href="/collections"
+            href="/catalogue"
             className="mt-8 inline-flex items-center gap-3 bg-transparent border border-white text-white px-6 py-3 text-xs font-semibold uppercase tracking-wide hover:bg-white hover:text-boza-black transition-all duration-300"
           >
             Découvrir la collection

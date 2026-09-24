@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePays } from "@/context/PaysContext";
 import { PAYS_SUPPORTES, isPaysSupporte } from "@/lib/devise";
+import CookiePreferencesModal from "@/components/CookieConsent/CookiePreferencesModal";
 
 function TiktokIcon() {
   return (
@@ -36,6 +38,7 @@ const RESEAUX_SOCIAUX = [
 
 export default function Footer() {
   const { pays, setPays } = usePays();
+  const [cookieModalOuverte, setCookieModalOuverte] = useState(false);
 
   return (
     <footer className="border-t border-boza-cream-alt bg-boza-cream max-w-[1700px] mx-auto mt-10 pt-10 pb-5 px-6">
@@ -47,7 +50,7 @@ export default function Footer() {
               <Link href="/faq" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Questions fréquentes</Link>
             </li>
             <li className="mb-4">
-              <a href="#" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Effectuer un retour</a>
+              <Link href="/retour" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Effectuer un retour</Link>
             </li>
             <li className="mb-4">
               <Link href="/contact" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Nous contacter</Link>
@@ -62,7 +65,7 @@ export default function Footer() {
               <Link href="/a-propos" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Qui sommes-nous ?</Link>
             </li>
             <li className="mb-4">
-              <a href="#" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Rejoignez notre équipe</a>
+              <Link href="/contact?sujet=Rejoindre%20l%27%C3%A9quipe" className="text-boza-taupe text-[13px] no-underline transition-colors duration-200 hover:text-boza-black">Rejoignez notre équipe</Link>
             </li>
           </ul>
         </div>
@@ -88,7 +91,13 @@ export default function Footer() {
 
       <div className="border-t border-boza-cream-alt pt-[15px] flex justify-center items-center gap-x-[60px] gap-y-3 flex-wrap max-[640px]:flex-col max-[640px]:items-center max-[640px]:gap-y-4 max-[640px]:text-center">
         <div className="flex flex-wrap justify-center gap-x-[5px] gap-y-2 max-[640px]:flex-col max-[640px]:gap-y-3 max-[640px]:items-center">
-          <a href="#" className="text-boza-taupe text-sm no-underline transition-colors duration-200 hover:text-boza-black">Préférences de cookies</a>
+          <button
+            type="button"
+            onClick={() => setCookieModalOuverte(true)}
+            className="text-boza-taupe text-sm bg-transparent border-0 p-0 cursor-pointer transition-colors duration-200 hover:text-boza-black"
+          >
+            Préférences de cookies
+          </button>
           <span className="text-boza-taupe mx-[5px] max-[640px]:hidden">|</span>
           <Link href="/politique-de-confidentialite" className="text-boza-taupe text-sm no-underline transition-colors duration-200 hover:text-boza-black">Politique de confidentialité</Link>
           <span className="text-boza-taupe mx-[5px] max-[640px]:hidden">|</span>
@@ -121,6 +130,8 @@ export default function Footer() {
           <span className="text-boza-black text-sm font-medium">Français</span>
         </div>
       </div>
+
+      <CookiePreferencesModal isOpen={cookieModalOuverte} onClose={() => setCookieModalOuverte(false)} />
     </footer>
   );
 }

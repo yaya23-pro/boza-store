@@ -12,6 +12,7 @@ const navItems = [
   { key: "dashboard", label: "Vue d'ensemble", icon: "fa-th-large", href: "/admin/dashboard" },
   { key: "produits", label: "Produits", icon: "fa-tshirt", href: "/admin/produits" },
   { key: "commandes", label: "Commandes", icon: "fa-box", href: "/admin/commandes" },
+  { key: "retours", label: "Retours", icon: "fa-undo", href: "/admin/retours" },
   { key: "clients", label: "Clients", icon: "fa-users", href: "/admin/clients" },
   { key: "parametres", label: "Paramètres", icon: "fa-cog", href: "/admin/parametres" },
 ];
