@@ -26,7 +26,7 @@ export default function QuickViewModal({ productId, onClose }: QuickViewModalPro
 
   return (
     <div
-className="fixed left-0 right-0 bottom-0 top-[110px] z-[900] bg-black/60 flex items-center justify-center px-4 py-6 max-[640px]:top-[160px] max-[640px]:px-0 max-[640px]:py-0"
+      className="fixed left-0 right-0 bottom-0 top-[80px] z-[900] bg-black/60 flex items-center justify-center px-4 py-6 max-[640px]:top-[160px] max-[640px]:px-0 max-[640px]:py-0"
       onClick={onClose}
     >
       <div
@@ -36,7 +36,7 @@ className="fixed left-0 right-0 bottom-0 top-[110px] z-[900] bg-black/60 flex it
         <button
           onClick={onClose}
           aria-label="Fermer"
-className="absolute top-3 right-3 z-10 w-8 h-8 bg-transparent text-boza-taupe border border-boza-black text-sm flex items-center justify-center transition-all duration-300 hover:text-boza-black"        >
+          className="absolute top-3 right-3 z-10 w-8 h-8 bg-transparent text-boza-taupe border border-boza-black text-sm flex items-center justify-center transition-all duration-300 hover:text-boza-black"        >
           <i className="fas fa-times"></i>
         </button>
 

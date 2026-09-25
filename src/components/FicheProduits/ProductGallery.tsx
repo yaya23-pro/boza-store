@@ -45,7 +45,7 @@ export default function ProductGallery({
 
   return (
     <div className="sticky top-2.5 grid grid-cols-[80px_1fr] gap-4 items-start ml-[100px] max-[991px]:static max-[991px]:max-w-full max-[991px]:ml-0 max-[991px]:grid-cols-1">
-      <div className="ml-5 flex flex-col gap-2.5 max-[991px]:order-2 max-[991px]:flex-row max-[991px]:overflow-x-auto max-[991px]:ml-0 max-[991px]:mt-3 max-[991px]:pb-1">
+      <div className="flex flex-col gap-2.5 max-[991px]:order-2 max-[991px]:flex-row max-[991px]:overflow-x-auto max-[991px]:mt-3 max-[991px]:pb-1">
         {images.map((img) => {
           const colorOfImg = imageColorMap[img];
           return (

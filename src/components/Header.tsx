@@ -50,7 +50,7 @@ export default function Header() {
 
   return (
     <header className="bg-boza-cream sticky top-0 z-[1000]">
-      <nav className="py-6 max-md:py-5">
+      <nav className="py-4 max-md:py-3">
         <div className="container mx-auto grid grid-cols-3 items-center w-full px-6 gap-3">
           {/* Gauche : bouton menu */}
           <div className="flex items-center">
@@ -60,7 +60,7 @@ export default function Header() {
               aria-label="Ouvrir le menu"
               className="flex items-center justify-center p-2 border-0 bg-transparent text-boza-black cursor-pointer"
             >
-              <Menu size={22} />
+              <Menu size={24} />
             </button>
           </div>
 
@@ -86,11 +86,11 @@ export default function Header() {
               aria-label="Compte"
               className="relative p-[5px] border-0 bg-transparent text-boza-black cursor-pointer inline-flex items-center justify-center"
             >
-              <User size={18} />
+              <User size={22} />
             </button>
 
             <Link href="/panier" aria-label="Panier" className="relative p-[5px] border-0 bg-transparent text-boza-black cursor-pointer inline-flex items-center justify-center">
-              <ShoppingCart size={18} />
+              <ShoppingCart size={22} />
               {itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 bg-boza-black text-boza-cream min-w-[16px] h-4 rounded-full flex items-center justify-center text-[10px] font-semibold">
                   {itemCount}
